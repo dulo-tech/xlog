@@ -21,7 +21,8 @@ import (
 func main() {
     // Start by creating a new logger. Each logger needs a name. The name is
     // usually reflective of the sub-system that will be logging messages. The
-    // name will appear in the logged messages.
+    // name will appear in the logged messages so each message can be linked to
+    // a specific area of your code.
     logger := xlog.NewLogger("testing")
     
     // Add files where the logs will be written. You can use a full system path
