@@ -121,6 +121,22 @@ func NewLogger(name string) *Logger {
 	}
 }
 
+// NewMultiLogger returns a *Logger instance that's been initialized with one or
+// more files at the given level.
+func NewMultiLogger(name string, files []string, level Level) *Logger {
+	logger := NewLogger(name)
+	logger.MultiAppend(files, level);
+	return logger;
+}
+
+// NewMultiWriterLogger returns a *Logger instance that's been initialized with one or
+// more writers at the given level.
+func NewMultiWriterLogger(name string, writers []io.Writer, level Level) *Logger {
+	logger := NewLogger(name)
+	logger.MultiAppendWriter(writers, level);
+	return logger;
+}
+
 // NewFormattedLogger returns a *Logger instance using the provided formatter.
 func NewFormattedLogger(formatter Formatter) *Logger {
 	return &Logger{
