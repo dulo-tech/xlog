@@ -86,12 +86,17 @@ func main() {
     
     // You can manage the files yourself by using the logger.AppendWriter()
     // method.
-    fp, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE | os.O_APPEND, 0666)
+    fp, err := os.OpenFile(
+        "/var/logs/main-error.log",
+        os.O_RDWR|os.O_CREATE | os.O_APPEND,
+        0666,
+    )
     if err != nil {
         panic(err)
     }
     defer fp.Close()
-    logger.AppendWriter(fp)
+    logger.AppendWriter(fp, xlog.Debug)
+    logger.AppendWriter(os.Stderr, xlog.Error)
     
     // You can replicate the functionality of Go's system logger log.Fatal()
     // and log.Panic() using logger.FatalOn and logger.PanicOn.
