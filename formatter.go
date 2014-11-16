@@ -9,8 +9,9 @@ import (
 
 // Formatter is an interface that provides methods that format log messages.
 type Formatter interface {
-	Format(level Level, v ...interface{}) string
+	SetMessageFormat(messageFormat string)
 	SetName(name string)
+	Format(level Level, v ...interface{}) string
 }
 
 // DefaultFormatter is the default implementation of the Formatter interface.
@@ -24,6 +25,17 @@ type DefaultFormatter struct {
 func NewDefaultFormatter(messageFormat string) *DefaultFormatter {
 	messageFormat, dateFormat := SanitizeForDate(messageFormat)
 	return &DefaultFormatter{messageFormat, dateFormat, ""}
+}
+
+// SetMessageFormat changes the set message format.
+func (f *DefaultFormatter) SetMessageFormat(messageFormat string) {
+	f.messageFormat, f.dateFormat = SanitizeForDate(messageFormat)
+}
+
+// SetName sets the name of the formatter. The name is available in messages
+// using the {name} placeholder.
+func (f *DefaultFormatter) SetName(name string) {
+	f.name = name
 }
 
 // Format formats a log message for the given level.
@@ -41,12 +53,6 @@ func (f *DefaultFormatter) Format(level Level, v ...interface{}) string {
 	}
 
 	return formatted
-}
-
-// SetName sets the name of the formatter. The name is available in messages
-// using the {name} placeholder.
-func (f *DefaultFormatter) SetName(name string) {
-	f.name = name
 }
 
 // SanitizeForDate replaces date placeholders containing a date format with
