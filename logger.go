@@ -233,97 +233,97 @@ func (l *Logger) Logf(level Level, format string, v ...interface{}) {
 	l.Log(level, fmt.Sprintf(format, v...))
 }
 
-// Debug prints to each log file at the Debug level.
+// Debug writes to the logger at the Debug level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Debug(v ...interface{}) {
 	l.Log(Debug, v...)
 }
 
-// Debugf prints to each log file at the Debug level.
+// Debugf writes to the logger at the Debug level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	l.Logf(Debug, format, v...)
 }
 
-// Info prints to each log file at the Info level.
+// Info writes to the logger at the Info level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Info(v ...interface{}) {
 	l.Log(Info, v...)
 }
 
-// Infof prints to each log file at the Info level.
+// Infof writes to the logger at the Info level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Infof(format string, v ...interface{}) {
 	l.Logf(Info, format, v...)
 }
 
-// Notice prints to each log file at the Notice level.
+// Notice writes to the logger at the Notice level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Notice(v ...interface{}) {
 	l.Log(Notice, v...)
 }
 
-// Noticef prints to each log file at the Notice level.
+// Noticef writes to the logger at the Notice level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Noticef(format string, v ...interface{}) {
 	l.Logf(Notice, format, v...)
 }
 
-// Warning prints to each log file at the Warning level.
+// Warning writes to the logger at the Warning level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Warning(v ...interface{}) {
 	l.Log(Warning, v...)
 }
 
-// Warningf prints to each log file at the Warning level.
+// Warningf writes to the logger at the Warning level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Warningf(format string, v ...interface{}) {
 	l.Logf(Warning, format, v...)
 }
 
-// Error prints to each log file at the Error level.
+// Error writes to the logger at the Error level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Error(v ...interface{}) {
 	l.Log(Error, v...)
 }
 
-// Errorf prints to each log file at the Error level.
+// Errorf writes to the logger at the Error level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	l.Logf(Error, format, v...)
 }
 
-// Critical prints to each log file at the Critical level.
+// Critical writes to the logger at the Critical level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Critical(v ...interface{}) {
 	l.Log(Critical, v...)
 }
 
-// Criticalf prints to each log file at the Critical level.
+// Criticalf writes to the logger at the Critical level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Criticalf(format string, v ...interface{}) {
 	l.Logf(Critical, format, v...)
 }
 
-// Alert prints to each log file at the Alert level.
+// Alert writes to the logger at the Alert level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Alert(v ...interface{}) {
 	l.Log(Alert, v...)
 }
 
-// Alertf prints to each log file at the Alert level.
+// Alertf writes to the logger at the Alert level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Alertf(format string, v ...interface{}) {
 	l.Logf(Alert, format, v...)
 }
 
-// Emergency prints to each log file at the Emergency level.
+// Emergency writes to the logger at the Emergency level.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Emergency(v ...interface{}) {
 	l.Log(Emergency, v...)
 }
 
-// Emergencyf prints to each log file at the Emergency level.
+// Emergencyf writes to the logger at the Emergency level.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
 	l.Logf(Emergency, format, v...)
