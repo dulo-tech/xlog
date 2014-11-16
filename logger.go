@@ -201,6 +201,11 @@ func (l *Logger) MultiAppendWriters(writers []io.Writer, level Level) {
 	}
 }
 
+// ClearAppended removes all the files that have been appended to the logger.
+func (l *Logger) ClearAppended() {
+	l.Loggers.Clear()
+}
+
 // Close disables logging and frees up resources used by the logger.
 // Note this method only closes files opened by the logger. It's the user's
 // responsibility to close files that were passed to the logger via the
