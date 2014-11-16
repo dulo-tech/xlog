@@ -42,10 +42,20 @@ var Aliases = map[string]*os.File{
 
 var (
 	// DefaultDateFormat is the date format to use when none has been specified.
-	DefaultDateFormat = "2006-01-02 15:04:05.000"
+	DefaultDateFormat string = "2006-01-02 15:04:05.000"
 	
 	// DefaultMessageFormat is the message format to use when none has been specified.
-	DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
+	DefaultMessageFormat string = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
+	
+	// DefaultAppendFiles stores the names of files appended to the logger by default.
+	DefaultAppendFiles []string
+	
+	// DefaultAppendWriters stores writers that are appended to the logger by default.
+	DefaultAppendWriters []io.Writer
+	
+	// DefaultAppendLevel is the default level used when appending files from
+	// DefaultAppendFiles and DefaultAppendWriters.
+	DefaultAppendLevel Level = DebugLevel
 
 	// FileFlags defines the file open options.
 	FileOpenFlags int = os.O_RDWR|os.O_CREATE|os.O_APPEND
@@ -112,13 +122,21 @@ type Logger struct {
 
 // NewLogger returns a *Logger instance that's been initialized with default values.
 func NewLogger(name string) *Logger {
-	return &Logger{
+	logger := &Logger{
 		Enabled: true,
 		Formatter: NewDefaultFormatter(DefaultMessageFormat, name),
 		Loggers: NewDefaultLoggerMap(),
 		pointers: make([]*os.File, 0),
 		closed: false,
 	}
+	if DefaultAppendFiles != nil && len(DefaultAppendFiles) > 0 {
+		logger.MultiAppend(DefaultAppendFiles, DefaultAppendLevel)
+	}
+	if DefaultAppendWriters != nil && len(DefaultAppendWriters) > 0 {
+		logger.MultiAppendWriters(DefaultAppendWriters, DefaultAppendLevel)
+	}
+	
+	return logger
 }
 
 // NewMultiLogger returns a *Logger instance that's been initialized with one or
@@ -133,19 +151,15 @@ func NewMultiLogger(name string, files []string, level Level) *Logger {
 // more writers at the given level.
 func NewMultiWriterLogger(name string, writers []io.Writer, level Level) *Logger {
 	logger := NewLogger(name)
-	logger.MultiAppendWriter(writers, level);
+	logger.MultiAppendWriters(writers, level);
 	return logger;
 }
 
 // NewFormattedLogger returns a *Logger instance using the provided formatter.
 func NewFormattedLogger(formatter Formatter) *Logger {
-	return &Logger{
-		Enabled: true,
-		Formatter: formatter,
-		Loggers: NewDefaultLoggerMap(),
-		pointers: make([]*os.File, 0),
-		closed: false,
-	}
+	logger := NewLogger("")
+	logger.Formatter = formatter
+	return logger
 }
 
 // SetName sets the name of the logger.
@@ -180,8 +194,8 @@ func (l *Logger) AppendWriter(writer io.Writer, level Level) {
 	l.Loggers.Append(newLogger(writer), level)
 }
 
-// MultiAppendWriter adds one or more io.Writer instances to the logger.
-func (l *Logger) MultiAppendWriter(writers []io.Writer, level Level) {
+// MultiAppendWriters adds one or more io.Writer instances to the logger.
+func (l *Logger) MultiAppendWriters(writers []io.Writer, level Level) {
 	for _, writer := range writers {
 		l.AppendWriter(writer, level)
 	}
