@@ -292,7 +292,10 @@ type Formatter interface {
 }
 ```
 
-Example:
+This example creates a formatter than always formats messages into an empty
+string. The logger discards empty messages, which means this formatter causes
+all messages to be discarded.
+
 
 ```go
 package main
@@ -314,8 +317,6 @@ func (f *NullFormatter) SetName(name string) {
 
 // Format formats a log message for the given level.
 func (f *NullFormatter) Format(level Level, v ...interface{}) string {
-    // The logger does not write empty messages. Returning an empty string
-    // from the formatter will cause all log messages to be discarded.
     return ""
 }
 
@@ -353,7 +354,6 @@ If you wanted logs written at a given level to only be written at that level, an
 not levels greater than it, you can implement your own logger map which changes
 the default behavior.
 
-Example:
 
 ```go
 package main
