@@ -206,8 +206,10 @@ func (l *Logger) Writable() bool {
 func (l *Logger) Log(level Level, v ...interface{}) {
 	if l.Writable() {
 		message := l.Formatter.Format(level, v...)
-		for _, logger := range l.Loggers.FindByLevel(level) {
-			logger.Print(message)
+		if message != "" {
+			for _, logger := range l.Loggers.FindByLevel(level) {
+				logger.Print(message)
+			}
 		}
 
 		if FatalOn&level > 0 {
