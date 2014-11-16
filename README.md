@@ -10,7 +10,7 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 
 
 #### Installation
-Use the go get command to fetch the package.
+Use the go get command to fetch the package.  
 `go get github.com/dulo-tech/xlog`
 
 Then use the import statement in your source code to use the package.
