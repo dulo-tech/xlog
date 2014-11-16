@@ -111,7 +111,14 @@ func main() {
     
     // Change the way the log messages are formatted. The xlog.Formatter interface
     // requires a format string and a name. The format string defines how the
-    // log messages are formatted.
+    // log messages are formatted. The name is the same value you would pass to
+    // a new xdt.Logger instance. Several placeholders can be used in the format
+    // string, which will be replaced by actual values:
+    //
+    // {date} The datetime when the message was logged.
+    // {name} The name of the logger/formatter.
+    // {level} A string representation of the log level.
+    // {message} The message that was logged.
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date} {name} - {level} - {message}",
         "testing",
@@ -133,13 +140,13 @@ func main() {
     
     // Creating a logger with a pre-configured formatter.
     formatter := xlog.NewDefaultFormatter(
-        "{date} {name}.{level} - {message}",
+        "{date} {name} [{level}] {message}",
         "testing",
     )
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.Debug)
     
-    // Outputs: 2014-11-15 09:59:32.427 testing.DEBUG - Test debug message.
+    // Outputs: 2014-11-15 09:59:32.427 testing [DEBUG] Test debug message.
     logger.Debug("Test debug message.")
     
     // The message format can be changed without setting a new Formatter. The
