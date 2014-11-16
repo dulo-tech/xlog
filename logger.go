@@ -58,8 +58,8 @@ var (
 	// appended.
 	PanicOnFileErrors = true
 
-	// LoggerCapacity defines the initial capacity for each type of logger.
-	LoggerCapacity = 2
+	// InitialLoggerCapacity defines the initial capacity for each type of logger.
+	InitialLoggerCapacity = 4
 
 	// FatalOn represents levels that causes the application to exit.
 	FatalOn Level = 0
