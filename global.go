@@ -33,9 +33,9 @@ func AppendWriter(writer io.Writer, level Level) {
 	instance().AppendWriter(writer, level)
 }
 
-// MultiAppendWriter adds one or more io.Writer instances to the global logger.
-func MultiAppendWriter(writers []io.Writer, level Level) {
-	instance().MultiAppendWriter(writers, level)
+// MultiAppendWriters adds one or more io.Writer instances to the global logger.
+func MultiAppendWriters(writers []io.Writer, level Level) {
+	instance().MultiAppendWriters(writers, level)
 }
 
 // Writable returns true when global logging is enabled, and the global logger
