@@ -18,6 +18,26 @@ func SetName(name string) {
 	instance().SetName(name)
 }
 
+// SetFormatter sets the formatter used by the global logger.
+func SetFormatter(formatter Formatter) {
+	instance().Formatter = formatter
+}
+
+// SetLoggerMap sets the logger map used by the global logger.
+func SetLoggerMap(lm LoggerMap) {
+	instance().Loggers = lm
+}
+
+// Enabled returns whether the global logger is enabled.
+func Enabled() bool {
+	return instance().Enabled
+}
+
+// SetEnabled sets whether the global logger is enabled.
+func SetEnabled(enabled bool) {
+	instance().Enabled = enabled
+}
+
 // Append adds a file to the global logger.
 func Append(file string, level Level) {
 	instance().Append(file, level)
