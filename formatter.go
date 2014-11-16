@@ -9,7 +9,6 @@ import (
 
 // Formatter is an interface that provides methods that format log messages.
 type Formatter interface {
-	SetMessageFormat(messageFormat string)
 	SetName(name string)
 	Format(level Level, v ...interface{}) string
 }
