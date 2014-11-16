@@ -110,8 +110,6 @@ type Logger struct {
 
 // NewLogger returns a *Logger instance that's been initialized with default values.
 func NewLogger() *Logger {
-	//fmt.Println(v & Info);
-
 	return &Logger{
 		Enabled: true,
 		Formatter: NewDefaultFormatter(DefaultMessageFormat, ""),
