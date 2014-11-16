@@ -33,8 +33,8 @@ var Levels = map[Level]string{
 	Emergency: "EMERGENCY",
 }
 
-// FileAliases maps file aliases to real file pointers.
-var FileAliases = map[string]*os.File{
+// Aliases maps file aliases to real file pointers.
+var Aliases = map[string]*os.File{
 	"stdout": os.Stdout,
 	"stdin": os.Stdin,
 	"stderr": os.Stderr,
@@ -150,7 +150,7 @@ func NewFormattedLogger(formatter Formatter) *Logger {
 // The file argument may be either the full path to a system file, or one of the
 // aliases "stdout", "stdin", or "stderr".
 func (l *Logger) Append(file string, level Level) {
-	if w, ok := FileAliases[file]; ok {
+	if w, ok := Aliases[file]; ok {
 		l.Loggers.Append(newLogger(w), level)
 	} else {
 		w := l.open(file)
