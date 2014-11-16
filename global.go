@@ -5,6 +5,9 @@ import "io"
 // globalInstance stores the global logger.
 var globalInstance *Logger
 
+// globalAppended stores whether files have been appended to the global logger.
+var globalAppended bool = false
+
 // Close releases any resources held by the global logger. The logger should
 // not be used again after calling this method without re-configuring it, as
 // this method sets the global instance to nil.
@@ -40,21 +43,37 @@ func SetEnabled(enabled bool) {
 
 // Append adds a file to the global logger.
 func Append(file string, level Level) {
+	if !globalAppended {
+		instance().ClearAppended()
+		globalAppended = true
+	}
 	instance().Append(file, level)
 }
 
 // MultiAppend adds one or more files to the global logger.
 func MultiAppend(files []string, level Level) {
+	if !globalAppended {
+		instance().ClearAppended()
+		globalAppended = true
+	}
 	instance().MultiAppend(files, level)
 }
 
 // AppendWriter adds a writer to the global logger.
 func AppendWriter(writer io.Writer, level Level) {
+	if !globalAppended {
+		instance().ClearAppended()
+		globalAppended = true
+	}
 	instance().AppendWriter(writer, level)
 }
 
 // MultiAppendWriters adds one or more io.Writer instances to the global logger.
 func MultiAppendWriters(writers []io.Writer, level Level) {
+	if !globalAppended {
+		instance().ClearAppended()
+		globalAppended = true
+	}
 	instance().MultiAppendWriters(writers, level)
 }
 
@@ -176,6 +195,8 @@ func Emergencyf(format string, v ...interface{}) {
 func instance() *Logger {
 	if globalInstance == nil {
 		globalInstance = NewLogger("xlog")
+		globalInstance.Append("stdout", DebugLevel)
+		globalAppended = false
 	}
 	return globalInstance
 }
