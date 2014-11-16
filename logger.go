@@ -114,7 +114,7 @@ func NewLogger() *Logger {
 
 	return &Logger{
 		Enabled: true,
-		Formatter: NewDefaultFormatter(DefaultMessageFormat),
+		Formatter: NewDefaultFormatter(DefaultMessageFormat, ""),
 		Loggers: NewDefaultLoggerMap(),
 		FatalOn: 0,
 		PanicOn: 0,
