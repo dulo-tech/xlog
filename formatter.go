@@ -22,9 +22,9 @@ type DefaultFormatter struct {
 }
 
 // NewDefaultFormatter creates and returns a new DefaultFormatter instance.
-func NewDefaultFormatter(messageFormat string) *DefaultFormatter {
+func NewDefaultFormatter(messageFormat, name string) *DefaultFormatter {
 	messageFormat, dateFormat := SanitizeForDate(messageFormat)
-	return &DefaultFormatter{messageFormat, dateFormat, ""}
+	return &DefaultFormatter{messageFormat, dateFormat, name}
 }
 
 // SetMessageFormat changes the set message format.
