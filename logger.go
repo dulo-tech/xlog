@@ -174,8 +174,8 @@ func (l *Logger) MultiAppend(files []string, level Level) {
 }
 
 // AppendWriter adds a writer that will be written to at the given level or greater.
-func (l *Logger) AppendWriter(w io.Writer, level Level) {
-	l.Loggers.Append(newLogger(w), level)
+func (l *Logger) AppendWriter(writer io.Writer, level Level) {
+	l.Loggers.Append(newLogger(writer), level)
 }
 
 // MultiAppendWriter adds one or more io.Writer instances to the logger.
