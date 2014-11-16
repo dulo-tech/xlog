@@ -77,6 +77,8 @@ type Loggable interface {
 	Debugf(format string, v ...interface{})
 	Info(v ...interface{})
 	Infof(format string, v ...interface{})
+	Notice(v ...interface{})
+	Noticef(format string, v ...interface{})
 	Warning(v ...interface{})
 	Warningf(format string, v ...interface{})
 	Error(v ...interface{})
