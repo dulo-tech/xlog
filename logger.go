@@ -149,9 +149,23 @@ func (l *Logger) Append(file string, level Level) {
 	}
 }
 
+// MultiAppend adds one or more files to the logger.
+func (l *Logger) MultiAppend(files []string, level Level) {
+	for _, file := range files {
+		l.Append(file, level)
+	}
+}
+
 // AppendWriter adds a writer that will be written to at the given level or greater.
 func (l *Logger) AppendWriter(w io.Writer, level Level) {
 	l.Loggers.Append(newLogger(w), level)
+}
+
+// MultiAppendWriter adds one or more io.Writer instances to the logger.
+func (l *Logger) MultiAppendWriter(writers []io.Writer, level Level) {
+	for _, writer := range writers {
+		l.AppendWriter(writer, level)
+	}
 }
 
 // Close disables logging and frees up resources used by the logger.
