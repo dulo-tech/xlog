@@ -7,6 +7,7 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 * [Installation](#installation)
 * [Examples](#examples)
 * [Global Configuration](#global-configuration)
+* [Extending](#extending)
 
 
 #### Installation
@@ -273,5 +274,53 @@ func main() {
     xlog.Aliases["output"] = fp
     logger := NewLogger()
     logger.Append("output", xlog.Debug)
+}
+```
+
+
+#### Extending
+You can create your own message formatter and pass it to the logger class.
+Formatters are instances of the xlog.Formatter interface, which has the
+following signature:
+
+```go
+type Formatter interface {
+	SetName(name string)
+	Format(level Level, v ...interface{}) string
+}
+```
+
+Example:
+
+```go
+package main
+
+import (
+    "github.com/dulo-tech/xlog"
+)
+
+// NullFormatter implements the xlog.Formatter interface where all
+// log messages are discarded.
+type NullFormatter struct {
+	name string
+}
+
+// SetName sets the name of the formatter.
+func (f *NullFormatter) SetName(name string) {
+	f.name = name
+}
+
+// Format formats a log message for the given level.
+func (f *NullFormatter) Format(level Level, v ...interface{}) string {
+    // The logger does not write empty messages. Returning an empty string
+    // from the formatter will cause all log messages to be discarded.
+    return ""
+}
+
+func main() {
+    // Creating a logger which discards all messages.
+    formatter := &NullFormatter{""}
+    logger = xlog.NewFormattedLogger(formatter)
+    logger.Append("stdout", xlog.Debug)
 }
 ```
