@@ -416,7 +416,7 @@ func main() {
     loggerC.Warning("Test warning message.")
     
     // This doesn't output anything because xlog.WarningLevel was set as the
-    // global default when loggerD was created.
+    // global default level when loggerD was created.
     loggerD.Debug("Test debug message.")
 }
 ```
