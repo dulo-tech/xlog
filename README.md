@@ -432,6 +432,9 @@ type LoggerMap interface {
 	// FindByLevel returns all the loggers added to the map at the given level
 	// or greater.
 	FindByLevel(level Level) []*log.Logger
+	
+    // Clear removes all the appended loggers.
+    Clear()
 }
 ```
 
@@ -461,14 +464,10 @@ type CustomLoggerMap struct {
 
 // NewCustomLoggerMap creates and returns a *CustomLoggerMap instance.
 func NewCustomLoggerMap() *CustomLoggerMap {
-    // Make the internal map the size of xlog.Levels, and initialize
-    // each slice to the default initial capacity.
-	loggers := make(map[xlog.Level][]*log.Logger, len(xlog.Levels))
-	for level, _ := range xlog.Levels {
-		loggers[level] = make([]*log.Logger, 0, xlog.InitialLoggerCapacity)
-	}
-
-	return &CustomLoggerMap{loggers}
+    // Use the Clear() method to initialize the internal map.
+	lm := &CustomLoggerMap{}
+	lm.Clear()
+	return lm
 }
 
 // Append adds a logger to the map at the given level.
@@ -479,6 +478,16 @@ func (m *CustomLoggerMap) Append(logger *log.Logger, level xlog.Level) {
 // FindByLevel returns the loggers at the given level, and only the given level.
 func (m *CustomLoggerMap) FindByLevel(level xlog.Level) []*log.Logger {
 	return m.loggers[level]
+}
+
+// Clear removes all the appended loggers.
+func (m *CustomLoggerMap) Clear() {
+    // Make the internal map the size of xlog.Levels, and initialize
+    // each slice to the default initial capacity.
+	m.loggers := make(map[xlog.Level][]*log.Logger, len(xlog.Levels))
+	for level, _ := range xlog.Levels {
+		m.loggers[level] = make([]*log.Logger, 0, xlog.InitialLoggerCapacity)
+	}
 }
 
 func main() {
