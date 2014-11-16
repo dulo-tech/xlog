@@ -6,6 +6,7 @@ import "log"
 type LoggerMap interface {
 	Append(logger *log.Logger, level Level)
 	FindByLevel(level Level) []*log.Logger
+	Clear()
 }
 
 // DefaultLoggerMap maps loggers to levels.
@@ -15,12 +16,9 @@ type DefaultLoggerMap struct {
 
 // NewDefaultLoggerMap creates and returns a *DefaultLoggerMap instance.
 func NewDefaultLoggerMap() *DefaultLoggerMap {
-	loggers := make(map[Level][]*log.Logger, len(Levels))
-	for level, _ := range Levels {
-		loggers[level] = make([]*log.Logger, 0, InitialLoggerCapacity)
-	}
-
-	return &DefaultLoggerMap{loggers}
+	lm := &DefaultLoggerMap{}
+	lm.Clear()
+	return lm
 }
 
 // Append adds a logger to the map at the given level.
@@ -35,4 +33,12 @@ func (m *DefaultLoggerMap) Append(logger *log.Logger, level Level) {
 // FindByLevel returns the loggers at the given level or higher.
 func (m *DefaultLoggerMap) FindByLevel(level Level) []*log.Logger {
 	return m.loggers[level]
+}
+
+// Clear removes all the appended loggers.
+func (m *DefaultLoggerMap) Clear() {
+	m.loggers = make(map[Level][]*log.Logger, len(Levels))
+	for level, _ := range Levels {
+		m.loggers[level] = make([]*log.Logger, 0, InitialLoggerCapacity)
+	}
 }
