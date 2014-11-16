@@ -11,7 +11,7 @@ import (
 const DefaultDateFormat = "2006-01-02 15:04:05.000"
 
 // DefaultMessageFormat is the message format to use when none has been specified.
-const DefaultMessageFormat = "{date|" + DefaultDateFormat + "} [{level}] {message}"
+const DefaultMessageFormat = "{date|" + DefaultDateFormat + "} {name}.{level} {message}"
 
 // Level describes a logging level.
 type Level int
@@ -109,10 +109,10 @@ type Logger struct {
 }
 
 // NewLogger returns a *Logger instance that's been initialized with default values.
-func NewLogger() *Logger {
+func NewLogger(name string) *Logger {
 	return &Logger{
 		Enabled: true,
-		Formatter: NewDefaultFormatter(DefaultMessageFormat, ""),
+		Formatter: NewDefaultFormatter(DefaultMessageFormat, name),
 		Loggers: NewDefaultLoggerMap(),
 		FatalOn: 0,
 		PanicOn: 0,
