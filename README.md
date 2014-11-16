@@ -44,8 +44,8 @@ func main() {
     // Warning level.
     logger.Infof("Test %s message.", "info")
     
-    // This logs messages Debug and above to stdout, and messages Error level and
-    // above to a file.
+    // This logs messages Debug and above to stdout, and messages Error level
+    // and above to a file.
     logger = xlog.NewLogger()
     logger.Append("stdout", xlog.Debug)
     logger.Append("/var/logs/main-error.log", Logs.Error)
@@ -58,25 +58,37 @@ func main() {
     // using panic().
     logger.PanicOn = xlog.Alert | xlog.Emergency
     
-    // Change the way the log messages are formatted.
-    logger.Formatter = xlog.NewDefaultFormatter("{date} main.{level} - {message}")
+    // Change the way the log messages are formatted. The Formatter interface
+    // requires a format string and a name. The format string defines how the
+    // log messages are formatted, and the name can be used in the format string
+    // with the {name} placeholder.
+    logger.Formatter = xlog.NewDefaultFormatter(
+        "{date} main.{level} - {name} - {message}",
+        "testing")
     
-    // Outputs: 2014-11-15 09:54:16.278 main.DEBUG - This is a debug test.
+    // Outputs: 2014-11-15 09:54:16.278 main.DEBUG - testing - This is a debug test.
     logger.Debug("Test debug message.")
     
     // Format the output date using Go's date format. 
     // See: http://golang.org/pkg/time/#Time.Format
-    logger.Formatter = xlog.NewDefaultFormatter("{date|Jan _2 15:04:05} {level} {message}")
+    logger.Formatter = xlog.NewDefaultFormatter(
+        "{date|Jan _2 15:04:05} {level} {message}",
+        "testing")
     
     // Outputs: Nov 15 09:56:56 DEBUG Test debug message.
     logger.Debug("Test debug message.")
     
     // Creating a logger with a pre-configured formatter.
-    formatter := xlog.NewDefaultFormatter("{date} main.{level} - {message}")
+    formatter := xlog.NewDefaultFormatter("{date} main.{level} - {message}", "testing")
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.Debug)
     
     // Outputs: 2014-11-15 09:59:32.427 main.DEBUG - Test debug message.
     logger.Debug("Test debug message.")
+    
+    // The message format can be changed without setting a new Formatter. The
+    // name can be changed as well.
+    logger.Formatter.SetMessageFormat("{date} {message}")
+    logger.Formatter.SetName("debug-testing")
 }
 ```
