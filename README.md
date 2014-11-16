@@ -412,7 +412,7 @@ func main() {
     loggerC := xlog.GetLogger("c")
     loggerD := xlog.GetLogger("d")
     
-    // Outputs: 2014-11-15 09:40:28.701 c.WARNING Test warning message.
+    // Outputs: 2014-11-15 c.WARNING Test warning message.
     loggerC.Warning("Test warning message.")
     
     // This doesn't output anything because xlog.WarningLevel was set as the
