@@ -7,6 +7,7 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 * [Installation](#installation)
 * [Examples](#examples)
 * [Global Configuration](#global-configuration)
+* [Global Logger](#global-logger)
 * [Custom Formatters](#custom-formatters)
 * [Custom Level Behavior](#custom-level-behavior)
 * [Loggable Interface](#loggable-interface)
@@ -203,11 +204,26 @@ Changing these values effects every logger.
 package main
 
 import (
+    "io"
+    "os"
     "time"
     "github.com/dulo-tech/xlog"
 )
 
 func main() {
+    // The first thing you need to do after creating a new logger is append
+    // one or more files to it. That must be done each and every time you
+    // create a logger. The alternative is to set the names of the files
+    // globally. Once done the files will be automatically appended to each
+    // new logger. You can also set global writers, which will also be
+    // automatically appended.
+    xlog.DefaultAppendFiles = []string{"stdout", "/var/log/messages.log"}
+    xlog.DefaultAppendWriters = []io.Writer{os.Stdout, os.Stderr}
+    
+    // The files and writers that you have automatically appended will by
+    // default be appended at the xlog.DebugLevel, but that can also be changed.
+    xlog.DefaultAppendLevel = xlog.WarningLevel
+
     // Change the message format for each new logger.
     xlog.DefaultMessageFormat = "{date} {message}"
     xlog.DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {level} {message}"
@@ -282,12 +298,79 @@ func main() {
 ```
 
 
+#### Global Logger
+You can use the global logger when your application is small, and does not need
+to log messages from several sub-systems using a different names. The global
+logger is easy to use, but it's not quite as flexible as using individual logger
+instances.
+
+```go
+package main
+
+import (
+    "os"
+    "fmt"
+    "github.com/dulo-tech/xlog"
+)
+
+func main() {
+    // The global logger has the same methods as a logger
+    // instance (Debug(), Warningf(), Info(), etc), but as exposed functions
+    // in the package scope.
+    
+    // Outputs: 2014-11-15 09:40:28.693 xlog.DEBUG Test debug message.
+    xlog.Debug("Test debug message.")
+    
+    // Outputs: 2014-11-15 09:40:28.693 xlog.DEBUG Test debug message.
+    xlog.Debugf("Test %s message.", "debug")
+    
+    // Outputs: 2014-11-15 09:40:28.701 xlog.WARNING Test warning message.
+    xlog.Warning("Test warning message.")
+
+    // By default the global logger has the name "xlog", but that can be
+    // changed.
+    xlog.SetName("testing")
+    
+    // Be default the global logger writes messages at xlog.DebugLevel and
+    // above to stdout. That can be changed by appending the files you want
+    // at the level you want. Note that calling any of the global Append
+    // functions removes the default stdout. You'll have to add it back
+    // if you still want to log to stdout.
+    xlog.Append("stderr", xlog.WarningLevel)
+    xlog.Append("stdout", xlog.DebugLevel)
+    xlog.AppendWriter(os.Stdout, xlog.InfoLevel)
+    
+    // Outputs: 2014-11-15 09:40:28.693 testing.DEBUG Test debug message.
+    xlog.Debug("Test debug message.")
+    
+    // Outputs: 2014-11-15 09:40:28.701 testing.WARNING Test warning message.
+    xlog.Warning("Test warning message.")
+    
+    // Just like the logger instances, you need to ensure the global logger
+    // closes any files it opened. You can continue to use the logger after
+    // closing it, but closing the logger resets it's configuration, which
+    // defaults the global logger to the default name and stdout.
+    xlog.Append("/var/log/messages.log", xlog.DebugLevel)
+    defer xlog.Close()
+    
+    // You can disable/enable global logging and test to see if it's enabled.
+    xlog.SetEnabled(false)
+    if !xlog.Enabled() {
+        fmt.Println("Logging is disabled.")
+    }
+}
+```
+
+
 #### Custom Formatters
 You can create your own message formatter by creating a struct that implements
 the `xlog.Formatter` interface, which has the following signature:
 
 ```go
 type Formatter interface {
+    // Name returns the name of the formatter.
+    Name() string
+    
     // SetName sets the name of the formatter.
 	SetName(name string)
 	
@@ -304,14 +387,17 @@ all messages to be discarded.
 ```go
 package main
 
-import (
-    "github.com/dulo-tech/xlog"
-)
+import "github.com/dulo-tech/xlog"
 
 // NullFormatter implements the xlog.Formatter interface where all
 // log messages are discarded.
 type NullFormatter struct {
 	name string
+}
+
+// Name returns the name of the formatter.
+func (f *NullFormatter) Name() string {
+    return f.name
 }
 
 // SetName sets the name of the formatter.
