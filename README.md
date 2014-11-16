@@ -7,7 +7,10 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 * [Installation](#installation)
 * [Examples](#examples)
 * [Global Configuration](#global-configuration)
-* [Extending](#extending)
+* [Custom Formatters](#custom-formatters)
+* [Custom Level Behavior](#custom-level-behavior)
+* [Loggable Interface](#loggable-interface)
+* [License](#license)
 
 
 #### Installation
@@ -278,7 +281,7 @@ func main() {
 ```
 
 
-#### Extending
+#### Custom Formatters
 You can create your own message formatter by creating a struct that implements
 the `xlog.Formatter` interface, which has the following signature:
 
@@ -345,6 +348,7 @@ type LoggerMap interface {
 }
 ```
 
+#### Custom Level Behavior
 By default when you log a message to the xlog.Debug level, the message is written
 to all files added at the `xlog.Debug` level *and greater*. The
 `xlog.LoggerMap.FindByLevel()` method is responsible for returning loggers registered
@@ -397,3 +401,69 @@ func main() {
     logger.Append("stdout", xlog.Debug)
 }
 ```
+
+#### Loggable Interface
+The `xlog.NewLogger()` method and other New methods return an instance of
+the struct `xlog.Logger`, which implements the `xlog.Loggable` interface.
+
+```go
+type Loggable interface {
+	Log(level Level, v ...interface{})
+	Logf(level Level, format string, v ...interface{})
+	Debug(v ...interface{})
+	Debugf(format string, v ...interface{})
+	Info(v ...interface{})
+	Infof(format string, v ...interface{})
+	Warning(v ...interface{})
+	Warningf(format string, v ...interface{})
+	Error(v ...interface{})
+	Errorf(format string, v ...interface{})
+	Critical(v ...interface{})
+	Criticalf(format string, v ...interface{})
+	Alert(v ...interface{})
+	Alertf(format string, v ...interface{})
+	Emergency(v ...interface{})
+	Emergencyf(format string, v ...interface{})
+}
+```
+
+Note the absence of methods like `Append()`, `MultiAppend()`, `AppendWriter()`,
+and `Close()`, which are members of the `xlog.Logger` struct. The `xlog.Loggable`
+interface does not concern itself for how a logger is configured or it's
+lifecycle. The `xlog.Loggable` interface only exposes methods for logging
+messages at various log levels.
+
+You are encouraged to reference `xlog.Loggable` instead of `xlog.Logger` in your
+code to keep it flexible to future API changes. For example instead of creating
+a struct using `xlog.Logger` like this:
+
+```go
+type WebScraper struct {
+    logger xlog.Logger
+}
+
+func NewWebScraper(logger *xlog.Logger) {
+    return &WebScraper{logger}
+}
+```
+
+You should instead use `xlog.Loggable` like this:
+
+```go
+type WebScraper struct {
+    logger xlog.Loggable
+}
+
+func NewWebScraper(logger *xlog.Loggable) {
+    return &WebScraper{logger}
+}
+```
+
+You should configure your loggers in the main package, and let the rest of your
+source code deal with the `xlog.Loggable` interface exclusively.
+
+
+#### License
+xLog is has been released under the MIT license, a copy of which is included in
+the LICENSE file, which you can find in the source code. You're encouraged to
+use the xLog source code in any way you want, for whatever reason you want.
