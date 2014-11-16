@@ -99,6 +99,25 @@ func main() {
     logger.AppendWriter(fp, xlog.Debug)
     logger.AppendWriter(os.Stderr, xlog.Error)
     
+    // You can append multiple files using xdt.Logger.MultiAppend() and
+    // xdt.Logger.MultiAppendWriter().
+    logger = xlog.NewLogger("testing")
+	logger.MultiAppend(
+		[]string{
+			"stderr",
+			"/var/logs/main-error.log",
+		},
+		xlog.Debug,
+	)
+    defer logger.Close()
+    
+    // You can also create the logger with an array of file names or writers.
+	files := []string{
+        "stderr",
+        "/var/logs/main-error.log",
+	}
+	logger = xlog.NewMultiLogger("testing", files, xdt.Debug)
+    
     // You can replicate the functionality of Go's system logger log.Fatal()
     // and log.Panic() using logger.FatalOn and logger.PanicOn.
     
