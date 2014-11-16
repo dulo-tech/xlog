@@ -20,7 +20,7 @@ func Instance() *Logger {
 		globalInstance.Append("stdout", DebugLevel)
 		globalAppended = false
 	}
-	
+
 	return globalInstance
 }
 
@@ -34,7 +34,7 @@ func GetLogger(name string) *Logger {
 	if _, ok := globalLoggers[name]; !ok {
 		globalLoggers[name] = NewLogger(name)
 	}
-	
+
 	return globalLoggers[name]
 }
 
