@@ -8,7 +8,7 @@ type LoggerMap interface {
 	FindByLevel(level Level) []*log.Logger
 }
 
-// Loggers maps loggers to levels.
+// DefaultLoggerMap maps loggers to levels.
 type DefaultLoggerMap struct {
 	loggers map[Level][]*log.Logger
 }
@@ -32,7 +32,7 @@ func (m *DefaultLoggerMap) Append(logger *log.Logger, level Level) {
 	}
 }
 
-// FindLevel returns the loggers at the given level or higher.
+// FindByLevel returns the loggers at the given level or higher.
 func (m *DefaultLoggerMap) FindByLevel(level Level) []*log.Logger {
 	return m.loggers[level]
 }
