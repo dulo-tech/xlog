@@ -44,18 +44,18 @@ func main() {
     // add is assigned a logging level. The file is written to when a message is
     // logged to that level or a greater level. The levels are:
     //
-    // xlog.Debug
-    // xlog.Info
-    // xlog.Notice
-    // xlog.Warning
-    // xlog.Error
-    // xlog.Critical
-    // xlog.Alert
-    // xlog.Emergency
+    // xlog.DebugLevel
+    // xlog.InfoLevel
+    // xlog.NoticeLevel
+    // xlog.WarningLevel
+    // xlog.ErrorLevel
+    // xlog.CriticalLevel
+    // xlog.AlertLevel
+    // xlog.EmergencyLevel
     //
-    // When you append a file using the xlog.Debug level, the file will be
+    // When you append a file using the xlog.DebugLevel level, the file will be
     // written to for every level, because every level is greater than xdt.Debug.
-    logger.Append("stdout", xlog.Debug)
+    logger.Append("stdout", xlog.DebugLevel)
     
     // For each log level there is a xdt.Loggable method used to write messages
     // to that level. For example xdt.Loggable.Debug(), xdt.Loggable.Alert(), etc.
@@ -74,13 +74,13 @@ func main() {
     // Outputs: 2014-11-15 09:40:28.723 testing.INFO Test info message.
     logger.Infof("Test %s message.", "info")
     
-    // Any log message with the xlog.Warning level and above will be logged to
+    // Any log message with the xlog.WarningLevel level and above will be logged to
     // stdout.
     logger = xlog.NewLogger("testing")
-    logger.Append("stdout", xlog.Warning)
+    logger.Append("stdout", xlog.WarningLevel)
     
-    // This doesn't output anything because the xlog.Debug level is lower than
-    // the xlog.Warning level.
+    // This doesn't output anything because the xlog.DebugLevel level is lower than
+    // the xlog.WarningLevel level.
     logger.Debug("Test debug message.")
     
     // Outputs: 2014-11-15 09:40:28.701 testing.WARNING Test warning message.
@@ -103,14 +103,15 @@ func main() {
     // can still call the methods without any errors.
     logger.Notice("Test notice message.")
     
-    // You can append as many files as you want. This logs messages xlog.Debug and
-    // above to stdout, and messages xlog.Error level and above to a file.
+    // You can append as many files as you want. This logs messages to the
+    // xlog.DebugLevel and above to stdout, and messages xlog.ErrorLevel level
+    // and above to a file.
     // Note, when you have the logger open files, the files need to be closed by
     // the logger by deferring the defer logger.Close() method. The logger cannot
     // be used once it's been closed.
     logger = xlog.NewLogger("testing")
-    logger.Append("stdout", xlog.Debug)
-    logger.Append("/var/logs/main-error.log", xlog.Error)
+    logger.Append("stdout", xlog.DebugLevel)
+    logger.Append("/var/logs/main-error.log", xlog.ErrorLevel)
     defer logger.Close()
     
     // You can manage the files yourself by using the logger.AppendWriter()
@@ -124,8 +125,8 @@ func main() {
         panic(err)
     }
     defer fp.Close()
-    logger.AppendWriter(fp, xlog.Debug)
-    logger.AppendWriter(os.Stderr, xlog.Error)
+    logger.AppendWriter(fp, xlog.DebugLevel)
+    logger.AppendWriter(os.Stderr, xlog.ErrorLevel)
     
     // You can append multiple files using xdt.Logger.MultiAppend() and
     // xdt.Logger.MultiAppendWriter().
@@ -135,7 +136,7 @@ func main() {
 			"stderr",
 			"/var/logs/main-error.log",
 		},
-		xlog.Debug,
+		xlog.DebugLevel,
 	)
     defer logger.Close()
     
@@ -181,7 +182,7 @@ func main() {
         "testing",
     )
     logger = xlog.NewFormattedLogger(formatter)
-    logger.Append("stdout", xlog.Debug)
+    logger.Append("stdout", xlog.DebugLevel)
     
     // Outputs: 2014-11-15 09:59:32.427 testing [DEBUG] Test debug message.
     logger.Debug("Test debug message.")
@@ -223,13 +224,13 @@ func main() {
     // You can replicate the functionality of Go's system logger log.Fatal()
     // and log.Panic() using logger.FatalOn and logger.PanicOn.
     
-    // Logging a message to the xlog.Critical level will cause a fatal shut down
+    // Logging a message to xlog.CriticalLevel will cause a fatal shut down
     // using os.Exit(1).
-    xlog.FatalOn = xlog.Critical
+    xlog.FatalOn = xlog.CriticalLevel
     
-    // Logging a message to either xlog.Alert or xlog.Emergency levels causes a
-    // panic using panic().
-    xlog.PanicOn = xlog.Alert | xlog.Emergency
+    // Logging a message to either xlog.AlertLevel or xlog.EmergencyLevel
+     // causes a panic using panic().
+    xlog.PanicOn = xlog.AlertLevel | xlog.EmergencyLevel
     
     // Change the mode and permissions used when the logger opens a file.
     xlog.FileOpenFlags = os.O_RDWR|os.O_CREATE|os.O_APPEND
@@ -249,10 +250,10 @@ func main() {
     
     // Each log level has a corresponding string representation which is used
     // in the log messages. Those can be changed. Here we change the string
-    // representations of the xlog.Debug and xlog.Info levels from their default
+    // representations of xlog.DebugLevel and xlog.InfoLevel from their default
     // values ("DEBUG", "INFO") to "Debug" and "Info".
-    xlog.Levels[xlog.Debug] = "Debug"
-    xlog.Levels[xlog.Info] = "Info"
+    xlog.Levels[xlog.DebugLevel] = "Debug"
+    xlog.Levels[xlog.InfoLevel] = "Info"
     
     // The strings "stdout", "stderr", and "stdin" may be passed as a file name
     // to the logger append methods, which is useful when the files to be written
@@ -276,7 +277,7 @@ func main() {
     // and then append the file using the alias.
     xlog.Aliases["output"] = fp
     logger := NewLogger()
-    logger.Append("output", xlog.Debug)
+    logger.Append("output", xlog.DebugLevel)
 }
 ```
 
@@ -327,7 +328,7 @@ func main() {
     // Creating a logger which discards all messages.
     formatter := &NullFormatter{""}
     logger = xlog.NewFormattedLogger(formatter)
-    logger.Append("stdout", xlog.Debug)
+    logger.Append("stdout", xlog.DebugLevel)
 }
 ```
 
@@ -349,8 +350,8 @@ type LoggerMap interface {
 ```
 
 #### Custom Level Behavior
-By default when you log a message to the xlog.Debug level, the message is written
-to all files added at the `xlog.Debug` level *and greater*. The
+By default when you log a message to `xlog.DebugLevel`, the message is written
+to all files added at the `xlog.DebugLevel` level *and greater*. The
 `xlog.LoggerMap.FindByLevel()` method is responsible for returning loggers registered
 at a given level and all those registered at greater levels.
 
@@ -398,7 +399,7 @@ func main() {
     // Creating a logger that uses the custom logger map.
     logger = xlog.NewLogger("testing")
     logger.Loggers = NewCustomLoggerMap()
-    logger.Append("stdout", xlog.Debug)
+    logger.Append("stdout", xlog.DebugLevel)
 }
 ```
 

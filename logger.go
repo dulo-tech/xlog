@@ -11,26 +11,26 @@ import (
 type Level int
 
 const (
-	Debug Level = 1 << iota
-	Info        = 1 << iota
-	Notice      = 1 << iota
-	Warning     = 1 << iota
-	Error       = 1 << iota
-	Critical    = 1 << iota
-	Alert       = 1 << iota
-	Emergency   = 1 << iota
+	DebugLevel Level = 1 << iota
+	InfoLevel        = 1 << iota
+	NoticeLevel      = 1 << iota
+	WarningLevel     = 1 << iota
+	ErrorLevel       = 1 << iota
+	CriticalLevel    = 1 << iota
+	AlertLevel       = 1 << iota
+	EmergencyLevel   = 1 << iota
 )
 
 // Levels maps Level to a string representation.
 var Levels = map[Level]string{
-	Debug: "DEBUG",
-	Info: "INFO",
-	Notice: "NOTICE",
-	Warning: "WARNING",
-	Error: "ERROR",
-	Critical: "CRITICAL",
-	Alert: "ALERT",
-	Emergency: "EMERGENCY",
+	DebugLevel: "DEBUG",
+	InfoLevel: "INFO",
+	NoticeLevel: "NOTICE",
+	WarningLevel: "WARNING",
+	ErrorLevel: "ERROR",
+	CriticalLevel: "CRITICAL",
+	AlertLevel: "ALERT",
+	EmergencyLevel: "EMERGENCY",
 }
 
 // Aliases maps file aliases to real file pointers.
@@ -233,100 +233,100 @@ func (l *Logger) Logf(level Level, format string, v ...interface{}) {
 	l.Log(level, fmt.Sprintf(format, v...))
 }
 
-// Debug writes to the logger at the Debug level.
+// Debug writes to the logger at DebugLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Debug(v ...interface{}) {
-	l.Log(Debug, v...)
+	l.Log(DebugLevel, v...)
 }
 
-// Debugf writes to the logger at the Debug level.
+// Debugf writes to the logger at DebugLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.Logf(Debug, format, v...)
+	l.Logf(DebugLevel, format, v...)
 }
 
-// Info writes to the logger at the Info level.
+// Info writes to the logger at InfoLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Info(v ...interface{}) {
-	l.Log(Info, v...)
+	l.Log(InfoLevel, v...)
 }
 
-// Infof writes to the logger at the Info level.
+// Infof writes to the logger at InfoLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.Logf(Info, format, v...)
+	l.Logf(InfoLevel, format, v...)
 }
 
-// Notice writes to the logger at the Notice level.
+// Notice writes to the logger at NoticeLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Notice(v ...interface{}) {
-	l.Log(Notice, v...)
+	l.Log(NoticeLevel, v...)
 }
 
-// Noticef writes to the logger at the Notice level.
+// Noticef writes to the logger at NoticeLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.Logf(Notice, format, v...)
+	l.Logf(NoticeLevel, format, v...)
 }
 
-// Warning writes to the logger at the Warning level.
+// Warning writes to the logger at WarningLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Warning(v ...interface{}) {
-	l.Log(Warning, v...)
+	l.Log(WarningLevel, v...)
 }
 
-// Warningf writes to the logger at the Warning level.
+// Warningf writes to the logger at WarningLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.Logf(Warning, format, v...)
+	l.Logf(WarningLevel, format, v...)
 }
 
-// Error writes to the logger at the Error level.
+// Error writes to the logger at ErrorLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Error(v ...interface{}) {
-	l.Log(Error, v...)
+	l.Log(ErrorLevel, v...)
 }
 
-// Errorf writes to the logger at the Error level.
+// Errorf writes to the logger at ErrorLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.Logf(Error, format, v...)
+	l.Logf(ErrorLevel, format, v...)
 }
 
-// Critical writes to the logger at the Critical level.
+// Critical writes to the logger at CriticalLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Critical(v ...interface{}) {
-	l.Log(Critical, v...)
+	l.Log(CriticalLevel, v...)
 }
 
-// Criticalf writes to the logger at the Critical level.
+// Criticalf writes to the logger at CriticalLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.Logf(Critical, format, v...)
+	l.Logf(CriticalLevel, format, v...)
 }
 
-// Alert writes to the logger at the Alert level.
+// Alert writes to the logger at AlertLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Alert(v ...interface{}) {
-	l.Log(Alert, v...)
+	l.Log(AlertLevel, v...)
 }
 
-// Alertf writes to the logger at the Alert level.
+// Alertf writes to the logger at AlertLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.Logf(Alert, format, v...)
+	l.Logf(AlertLevel, format, v...)
 }
 
-// Emergency writes to the logger at the Emergency level.
+// Emergency writes to the logger at EmergencyLevel.
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Emergency(v ...interface{}) {
-	l.Log(Emergency, v...)
+	l.Log(EmergencyLevel, v...)
 }
 
-// Emergencyf writes to the logger at the Emergency level.
+// Emergencyf writes to the logger at EmergencyLevel.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.Logf(Emergency, format, v...)
+	l.Logf(EmergencyLevel, format, v...)
 }
 
 // open returns a file that logs can be written to.
