@@ -7,12 +7,6 @@ import (
 	"io"
 )
 
-// DefaultDateFormat is the date format to use when none has been specified.
-const DefaultDateFormat = "2006-01-02 15:04:05.000"
-
-// DefaultMessageFormat is the message format to use when none has been specified.
-const DefaultMessageFormat = "{date|" + DefaultDateFormat + "} {name}.{level} {message}"
-
 // Level describes a logging level.
 type Level int
 
@@ -47,6 +41,12 @@ var FileAliases = map[string]*os.File{
 }
 
 var (
+	// DefaultDateFormat is the date format to use when none has been specified.
+	DefaultDateFormat = "2006-01-02 15:04:05.000"
+	
+	// DefaultMessageFormat is the message format to use when none has been specified.
+	DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
+
 	// FileFlags defines the file open options.
 	FileFlags int = os.O_RDWR|os.O_CREATE | os.O_APPEND
 
@@ -60,6 +60,12 @@ var (
 
 	// LoggerCapacity defines the initial capacity for each type of logger.
 	LoggerCapacity = 2
+
+	// FatalOn represents levels that causes the application to exit.
+	FatalOn Level = 0
+
+	// PanicOn represents levels that causes the application to panic.
+	PanicOn Level = 0
 )
 
 // Loggable is an interface that provides methods for logging messages to
@@ -95,12 +101,6 @@ type Logger struct {
 	// Loggers holds the appended file loggers.
 	Loggers LoggerMap
 
-	// FatalOn represents levels that causes the application to exit.
-	FatalOn Level
-
-	// PanicOn represents levels that causes the application to panic.
-	PanicOn Level
-
 	// pointers contains any files that have been opened for logging.
 	pointers []*os.File
 
@@ -114,8 +114,6 @@ func NewLogger(name string) *Logger {
 		Enabled: true,
 		Formatter: NewDefaultFormatter(DefaultMessageFormat, name),
 		Loggers: NewDefaultLoggerMap(),
-		FatalOn: 0,
-		PanicOn: 0,
 		pointers: make([]*os.File, 0),
 		closed: false,
 	}
@@ -143,8 +141,6 @@ func NewFormattedLogger(formatter Formatter) *Logger {
 		Enabled: true,
 		Formatter: formatter,
 		Loggers: NewDefaultLoggerMap(),
-		FatalOn: 0,
-		PanicOn: 0,
 		pointers: make([]*os.File, 0),
 		closed: false,
 	}
@@ -214,9 +210,9 @@ func (l *Logger) Log(level Level, v ...interface{}) {
 			logger.Print(message)
 		}
 
-		if l.FatalOn&level > 0 {
+		if FatalOn&level > 0 {
 			os.Exit(1)
-		} else if l.PanicOn&level > 0 {
+		} else if PanicOn&level > 0 {
 			panic(message)
 		}
 	}
