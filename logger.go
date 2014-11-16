@@ -225,7 +225,7 @@ func (l *Logger) Log(level Level, v ...interface{}) {
 	}
 }
 
-// Log writes the message to each logger appended at the given level or higher.
+// Logf writes the message to each logger appended at the given level or higher.
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Logf(level Level, format string, v ...interface{}) {
 	l.Log(level, fmt.Sprintf(format, v...))
