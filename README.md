@@ -279,9 +279,8 @@ func main() {
 
 
 #### Extending
-You can create your own message formatter and pass it to the logger class.
-Formatters are instances of the xlog.Formatter interface, which has the
-following signature:
+You can create your own message formatter by creating a struct that implements
+the `xlog.Formatter` interface, which has the following signature:
 
 ```go
 type Formatter interface {
@@ -328,10 +327,10 @@ func main() {
 }
 ```
 
-Internally the xlog package uses the standard Go logger, log.Logger. An instance
-of log.Logger is created for each file you append to the logger. The log.Logger
-instances are managed by the xlog.LoggerMap interface, which stores the loggers
-and makes them retrievable by level. The xlog.LoggerMap interface has the
+Internally the `xlog` package uses the standard Go logger, `log.Logger`. An instance
+of `log.Logger` is created for each file you append to the logger. The `log.Logger`
+instances are managed by the `xlog.LoggerMap` interface, which stores the loggers
+and makes them retrievable by level. The `xlog.LoggerMap` interface has the
 following signature:
 
 ```go
@@ -346,8 +345,8 @@ type LoggerMap interface {
 ```
 
 By default when you log a message to the xlog.Debug level, the message is written
-to all files added at the xlog.Debug level *and greater*. The
-xlog.LoggerMap.FindByLevel() method is responsible for returning loggers registered
+to all files added at the `xlog.Debug` level *and greater*. The
+`xlog.LoggerMap.FindByLevel()` method is responsible for returning loggers registered
 at a given level and all those registered at greater levels.
 
 If you wanted logs written at a given level to only be written at that level, and
