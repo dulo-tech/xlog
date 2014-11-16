@@ -9,6 +9,7 @@ import (
 
 // Formatter is an interface that provides methods that format log messages.
 type Formatter interface {
+	Name() string
 	SetName(name string)
 	Format(level Level, v ...interface{}) string
 }
@@ -35,6 +36,11 @@ func (f *DefaultFormatter) SetMessageFormat(messageFormat string) {
 // using the {name} placeholder.
 func (f *DefaultFormatter) SetName(name string) {
 	f.name = name
+}
+
+// Name returns the name of the formatter.
+func (f *DefaultFormatter) Name() string {
+	return f.name
 }
 
 // Format formats a log message for the given level.
