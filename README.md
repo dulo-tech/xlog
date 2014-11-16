@@ -361,6 +361,66 @@ func main() {
 }
 ```
 
+The `xlog.GetLogger()` function gives you the ease of a global logger, with
+the flexibility of named loggers. The function acts like a factory and global
+registry, which is useful when you have hundreds or even thousands of objects
+that need a logger, but you don't want to create thousands of *Logger instances.
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/dulo-tech/xlog"
+)
+
+func main() {
+    // The first call to xlog.GetLogger() with the name "a" creates a
+    // new logger for the name and returns it. The next time you call the
+    // function with the same name, the same *Logger instance is returned.
+    loggerA := xlog.GetLogger("a")
+    loggerA.Append("stdout", xlog.DebugLevel)
+    if loggerA == xlog.GetLogger("a") {
+        fmt.Println("xlog.GetLogger() returned the same instance for the same name.")
+    }
+    
+    loggerB := xlog.GetLogger("b")
+    loggerB.Append("stdout", xlog.DebugLevel)
+    if loggerB == xlog.GetLogger("b") {
+        fmt.Println("These loggers have the same name, and same instance.")
+    }
+    
+    if xlog.GetLogger("a") != xlog.GetLogger("b") {
+        fmt.Println("These are different instances.")
+    }
+    
+    // Outputs: 2014-11-15 09:40:28.693 a.DEBUG Test debug message.
+    loggerA.Debug("Test debug message.")
+    
+    // Outputs: 2014-11-15 09:40:28.701 b.WARNING Test warning message.
+    loggerB.Warning("Test warning message.")
+    
+    // Use the global default variables to configure the loggers returned by
+    // the xlog.GetLogger() function.
+    xlog.DefaultAppendFiles = []string{"stderr"}
+    xlog.DefaultGlobalLevel = xlog.WarningLevel
+    xlog.DefaultMessageFormat = "{date|2006-01-02} {name}.{level} {message}"
+    
+    // Now every logger returned by the function will be configured with the
+    // default values. There's no need to append files after getting the
+    // first logger.
+    loggerC := xlog.GetLogger("c")
+    loggerD := xlog.GetLogger("d")
+    
+    // Outputs: 2014-11-15 09:40:28.701 c.WARNING Test warning message.
+    loggerC.Warning("Test warning message.")
+    
+    // This doesn't output anything because xlog.WarningLevel was set as the
+    // global default when loggerD was created.
+    loggerD.Debug("Test debug message.")
+}
+```
+
 
 #### Custom Formatters
 You can create your own message formatter by creating a struct that implements
@@ -415,6 +475,9 @@ func main() {
     formatter := &NullFormatter{""}
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.DebugLevel)
+    
+    // You can also assign the custom formatter to the global logger.
+    xlog.SetFormatter(formatter)
 }
 ```
 
@@ -492,9 +555,13 @@ func (m *CustomLoggerMap) Clear() {
 
 func main() {
     // Creating a logger that uses the custom logger map.
+    lm := NewCustomLoggerMap()
     logger = xlog.NewLogger("testing")
-    logger.Loggers = NewCustomLoggerMap()
+    logger.Loggers = lm
     logger.Append("stdout", xlog.DebugLevel)
+    
+    // You can also set the custom logger map on the global logger.
+    xlog.SetLoggerMap(lm)
 }
 ```
 
