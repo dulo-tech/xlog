@@ -48,10 +48,10 @@ var (
 	DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
 
 	// FileFlags defines the file open options.
-	FileFlags int = os.O_RDWR|os.O_CREATE | os.O_APPEND
+	FileOpenFlags int = os.O_RDWR|os.O_CREATE|os.O_APPEND
 
 	// FileMode defines the mode files are opened in.
-	FileMode os.FileMode = 0666
+	FileOpenMode os.FileMode = 0666
 
 	// PanicOnFileErrors defines whether the logger should panic when opening a file
 	// fails. When set to false, any file open errors are ignored, and the file won't be
@@ -322,7 +322,7 @@ func (l *Logger) Emergencyf(format string, v ...interface{}) {
 
 // open returns a file that logs can be written to.
 func (l *Logger) open(name string) *os.File {
-	w, err := os.OpenFile(name, FileFlags, FileMode)
+	w, err := os.OpenFile(name, FileOpenFlags, FileOpenMode)
 	if err != nil {
 		if PanicOnFileErrors {
 			panic(err)
