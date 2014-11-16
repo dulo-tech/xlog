@@ -146,6 +146,11 @@ func NewFormattedLogger(formatter Formatter) *Logger {
 	}
 }
 
+// SetName sets the name of the logger.
+func (l *Logger) SetName(name string) {
+	l.Formatter.SetName(name)
+}
+
 // Append adds a file that will be written to at the given level or greater.
 // The file argument may be either the full path to a system file, or one of the
 // aliases "stdout", "stdin", or "stderr".
@@ -340,3 +345,4 @@ func (l *Logger) open(name string) *os.File {
 func newLogger(w io.Writer) *log.Logger {
 	return log.New(w, "", 0)
 }
+
