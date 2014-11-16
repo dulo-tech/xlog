@@ -64,7 +64,8 @@ func main() {
     // using the {name} placeholder.
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date} {name}.{level} - {message}",
-        "testing")
+        "testing",
+    )
     
     // Outputs: 2014-11-15 09:54:16.278 testing.DEBUG - This is a debug test.
     logger.Debug("Test debug message.")
@@ -74,13 +75,17 @@ func main() {
     // See: http://golang.org/pkg/time/#Time.Format
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date|Jan _2 15:04:05} {level} {message}",
-        "testing")
+        "testing",
+    )
     
     // Outputs: Nov 15 09:56:56 DEBUG Test debug message.
     logger.Debug("Test debug message.")
     
     // Creating a logger with a pre-configured formatter.
-    formatter := xlog.NewDefaultFormatter("{date} {name}.{level} - {message}", "testing")
+    formatter := xlog.NewDefaultFormatter(
+        "{date} {name}.{level} - {message}",
+        "testing",
+    )
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.Debug)
     
