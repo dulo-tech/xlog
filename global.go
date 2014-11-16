@@ -8,6 +8,16 @@ var globalInstance *Logger
 // globalAppended stores whether files have been appended to the global logger.
 var globalAppended bool = false
 
+// instance returns the global logger.
+func instance() *Logger {
+	if globalInstance == nil {
+		globalInstance = NewLogger("xlog")
+		globalInstance.Append("stdout", DebugLevel)
+		globalAppended = false
+	}
+	return globalInstance
+}
+
 // Close releases any resources held by the global logger. The logger should
 // not be used again after calling this method without re-configuring it, as
 // this method sets the global instance to nil.
@@ -191,12 +201,3 @@ func Emergencyf(format string, v ...interface{}) {
 	instance().Emergencyf(format, v...)
 }
 
-// instance calls panic() when the global logger has not been configured.
-func instance() *Logger {
-	if globalInstance == nil {
-		globalInstance = NewLogger("xlog")
-		globalInstance.Append("stdout", DebugLevel)
-		globalAppended = false
-	}
-	return globalInstance
-}
