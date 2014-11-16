@@ -346,7 +346,7 @@ type LoggerMap interface {
 ```
 
 By default when you log a message to the xlog.Debug level, the message is written
-to all files added at the xlog.Debug level *or greater*. The
+to all files added at the xlog.Debug level *and greater*. The
 xlog.LoggerMap.FindByLevel() method is responsible for returning loggers registered
 at a given level and all those registered at greater levels.
 
