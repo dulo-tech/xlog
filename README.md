@@ -1,12 +1,22 @@
 xLog
 ====
-Simple logger for the Go language.
+A simple logger for the Go language.
 
 Documentation is available from the [GoDoc website](http://godoc.org/github.com/dulo-tech/xlog).
 
+* [Installation](#installation)
+* [Examples](#examples)
+* [Global Configuration](#global-configuration)
+
 
 #### Installation
+Use the go get command to fetch the package.
 `go get github.com/dulo-tech/xlog`
+
+Then use the import statement in your source code to use the package.
+```go
+import "github.com/dulo-tech/xlog"
+```
 
 
 #### Examples
@@ -76,10 +86,24 @@ func main() {
     // Warning level.
     logger.Infof("Test %s message.", "info")
     
+    // Logging can be disabled, and when disabled the calls to the logging
+    // methods will simply be ignored.
+    
+    // Outputs: 2014-11-15 09:40:28.701 testing.NOTICE Test notice message.
+    logger.Notice("Test notice message.")
+    
+    // Now disable logging.
+    logger.Enabled = false
+    
+    // This doesn't output anything because logging is now disabled, but you
+    // can still call the methods without any errors.
+    logger.Notice("Test notice message.")
+    
     // You can append as many files as you want. This logs messages xlog.Debug and
     // above to stdout, and messages xlog.Error level and above to a file.
     // Note, when you have the logger open files, the files need to be closed by
-    // the logger by deferring the defer logger.Close() method.
+    // the logger by deferring the defer logger.Close() method. The logger cannot
+    // be used once it's been closed.
     logger = xlog.NewLogger("testing")
     logger.Append("stdout", xlog.Debug)
     logger.Append("/var/logs/main-error.log", xlog.Error)
@@ -117,17 +141,6 @@ func main() {
         "/var/logs/main-error.log",
 	}
 	logger = xlog.NewMultiLogger("testing", files, xdt.Debug)
-    
-    // You can replicate the functionality of Go's system logger log.Fatal()
-    // and log.Panic() using logger.FatalOn and logger.PanicOn.
-    
-    // Logging a message to the xlog.Critical level will cause a fatal shut down
-    // using os.Exit(1).
-    logger.FatalOn = xlog.Critical
-    
-    // Logging a message to either xlog.Alert or xlog.Emergency levels causes a
-    // panic using panic().
-    logger.PanicOn = xlog.Alert | xlog.Emergency
     
     // Change the way the log messages are formatted. The xlog.Formatter interface
     // requires a format string and a name. The format string defines how the
@@ -173,5 +186,92 @@ func main() {
     // name can be changed as well.
     logger.Formatter.SetMessageFormat("{date} {message}")
     logger.Formatter.SetName("debug-testing")
+}
+```
+
+
+#### Global Configuration
+The follow examples demonstrate the use of the xlog global configuration values.
+Changing these values effects every logger.
+
+```go
+package main
+
+import (
+    "time"
+    "github.com/dulo-tech/xlog"
+)
+
+func main() {
+    // Change the message format for each new logger.
+    xlog.DefaultMessageFormat = "{date} {message}"
+    xlog.DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {level} {message}"
+    
+    // Change the date format for each new logger. Either write it yourself,
+    // or use one of the defaults from the time package. Note that changing
+    // this global value has no effect when the message format string already
+    // specifies a date format, eg "{date|2006-01-02}". The default date
+    // format only applies to the "{date}" placeholder.
+    xlog.DefaultDateFormat = "2006-01-02 15:04:05.000"
+    xlog.DefaultDateFormat = time.UnixDate
+    xlog.DefaultDateFormat = time.StampMicro
+
+    // You can replicate the functionality of Go's system logger log.Fatal()
+    // and log.Panic() using logger.FatalOn and logger.PanicOn.
+    
+    // Logging a message to the xlog.Critical level will cause a fatal shut down
+    // using os.Exit(1).
+    xlog.FatalOn = xlog.Critical
+    
+    // Logging a message to either xlog.Alert or xlog.Emergency levels causes a
+    // panic using panic().
+    xlog.PanicOn = xlog.Alert | xlog.Emergency
+    
+    // Change the mode and permissions used when the logger opens a file.
+    xlog.FileOpenFlags = os.O_RDWR|os.O_CREATE|os.O_APPEND
+    xlog.FileOpenMode = 0666
+    
+    // The logger will panic by calling panic() when it fails to open a file.
+    // The panic can be globally suppressed. When the panics are suppressed,
+    // and the logger fails to open a file, the file will simply be ignored.
+    // No logs will be written to it.
+    xlog.PanicOnFileErrors = false
+    
+    // You can increase the loggers initial capacity for appended files, which
+    // may help with performance when you know the loggers being created will
+    // have more than 4 (the default) files appended. The logger uses this value
+    // with the make() function when allocating internal maps.
+    xlog.InitialLoggerCapacity = 10
+    
+    // Each log level has a corresponding string representation which is used
+    // in the log messages. Those can be changed. Here we change the string
+    // representations of the xlog.Debug and xlog.Info levels from their default
+    // values ("DEBUG", "INFO") to "Debug" and "Info".
+    xlog.Levels[xlog.Debug] = "Debug"
+    xlog.Levels[xlog.Info] = "Info"
+    
+    // The strings "stdout", "stderr", and "stdin" may be passed as a file name
+    // to the logger append methods, which is useful when the files to be written
+    // to are saved as strings in a configuration file, or passed as strings at
+    // the command line. Be default the aliases map to os.Stdout, os.Stderr, and
+    // os.Stdin, but those can be changed to any writer.
+    fp, err := os.OpenFile(
+        "/var/logs/output.log",
+        os.O_RDWR|os.O_CREATE | os.O_APPEND,
+        0666,
+    )
+    if err != nil {
+        panic(err)
+    }
+    defer fp.Close()
+    
+    xlog.Aliases["stdout"] = fp
+    xlog.Aliases["stderr"] = fp
+    
+    // You can even create your own aliases through the xlog.Aliases variable,
+    // and then append the file using the alias.
+    xlog.Aliases["output"] = fp
+    logger := NewLogger()
+    logger.Append("output", xlog.Debug)
 }
 ```
