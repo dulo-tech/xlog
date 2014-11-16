@@ -17,7 +17,7 @@ type DefaultLoggerMap struct {
 func NewDefaultLoggerMap() *DefaultLoggerMap {
 	loggers := make(map[Level][]*log.Logger, len(Levels))
 	for level, _ := range Levels {
-		loggers[level] = make([]*log.Logger, 0, LoggerCapacity)
+		loggers[level] = make([]*log.Logger, 0, InitialLoggerCapacity)
 	}
 
 	return &DefaultLoggerMap{loggers}
