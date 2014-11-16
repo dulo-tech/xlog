@@ -60,16 +60,17 @@ func main() {
     
     // Change the way the log messages are formatted. The Formatter interface
     // requires a format string and a name. The format string defines how the
-    // log messages are formatted, and the name can be used in the format string
-    // with the {name} placeholder.
+    // log messages are formatted. The name value is available in the format
+    // using the {name} placeholder.
     logger.Formatter = xlog.NewDefaultFormatter(
-        "{date} main.{level} - {name} - {message}",
+        "{date} {name}.{level} - {message}",
         "testing")
     
-    // Outputs: 2014-11-15 09:54:16.278 main.DEBUG - testing - This is a debug test.
+    // Outputs: 2014-11-15 09:54:16.278 testing.DEBUG - This is a debug test.
     logger.Debug("Test debug message.")
     
-    // Format the output date using Go's date format. 
+    // Change the way dates are printed using the Go time syntax inside the
+    // {date} placeholder.
     // See: http://golang.org/pkg/time/#Time.Format
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date|Jan _2 15:04:05} {level} {message}",
@@ -79,11 +80,11 @@ func main() {
     logger.Debug("Test debug message.")
     
     // Creating a logger with a pre-configured formatter.
-    formatter := xlog.NewDefaultFormatter("{date} main.{level} - {message}", "testing")
+    formatter := xlog.NewDefaultFormatter("{date} {name}.{level} - {message}", "testing")
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.Debug)
     
-    // Outputs: 2014-11-15 09:59:32.427 main.DEBUG - Test debug message.
+    // Outputs: 2014-11-15 09:59:32.427 testing.DEBUG - Test debug message.
     logger.Debug("Test debug message.")
     
     // The message format can be changed without setting a new Formatter. The
