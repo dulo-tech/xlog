@@ -34,7 +34,7 @@ var Levels = map[Level]string{
 }
 
 // Aliases maps file aliases to real file pointers.
-var Aliases = map[string]*os.File{
+var Aliases = map[string]io.Writer{
 	"stdout": os.Stdout,
 	"stdin": os.Stdin,
 	"stderr": os.Stderr,
