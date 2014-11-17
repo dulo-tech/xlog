@@ -46,13 +46,13 @@ func (f *DefaultFormatter) Format(name string, level Level, v ...interface{}) st
 		"{message}": fmt.Sprint(v...),
 		"{name}": name,
 	}
-	
+
 	formatted := f.messageFormat
 	for placeholder, value := range placeholders {
 		formatted = strings.Replace(formatted, placeholder, value, -1)
 	}
 	for key, fn := range f.funcs {
-		formatted = strings.Replace(formatted, "{" + key + "}", fn(key), -1)
+		formatted = strings.Replace(formatted, "{"+key+"}", fn(key), -1)
 	}
 
 	return formatted

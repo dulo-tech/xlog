@@ -103,7 +103,6 @@ func (l *DefaultLogger) Close() {
 	}
 }
 
-
 // Append adds a file that will be written to at the given level or greater.
 // The file argument may be either the full path to a system file, or one of the
 // aliases "stdout", "stdin", or "stderr".

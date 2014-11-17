@@ -12,12 +12,19 @@ import (
 const LoggerName = "testing"
 
 // Fixture creates and returns a new logger and writer.
-func Fixture(level Level) (*DefaultLogger, *MemoryWriter) {
+func LoggerFixture(level Level) (*DefaultLogger, *MemoryWriter) {
 	writer := NewMemoryWriter()
 	logger := NewLogger(LoggerName)
 	logger.AppendWriter(writer, level)
 
 	return logger, writer
+}
+
+// ActualEquals asserts that actual equals expected.
+func ActualEquals(t *testing.T, actual, expected string) {
+	if actual != expected {
+		t.Errorf("Expected '%s' but got '%s'.", expected, actual)
+	}
 }
 
 // ActualContains asserts that actual contains the sub-string expected.
@@ -36,7 +43,7 @@ func ActualIsNotEmpty(t *testing.T, actual string) {
 
 // TestName -
 func TestName(t *testing.T) {
-	logger, _ := Fixture(DebugLevel)
+	logger, _ := LoggerFixture(DebugLevel)
 	if logger.Name() != LoggerName {
 		t.Errorf("Expected a logger named '%s'.", LoggerName)
 	}
@@ -44,7 +51,7 @@ func TestName(t *testing.T) {
 
 // TestLevelCalls -
 func TestLevelCalls(t *testing.T) {
-	logger, writer := Fixture(DebugLevel)
+	logger, writer := LoggerFixture(DebugLevel)
 	var methods = map[Level]string{
 		DebugLevel: "Debug",
 		InfoLevel: "Info",
@@ -55,7 +62,7 @@ func TestLevelCalls(t *testing.T) {
 		AlertLevel: "Alert",
 		EmergencyLevel: "Emergency",
 	}
-	
+
 	for level, method := range methods {
 		writer.Clear()
 		Invoke(logger, method, "This is a test.")
@@ -66,7 +73,7 @@ func TestLevelCalls(t *testing.T) {
 
 // TestLevels -
 func TestLevels(t *testing.T) {
-	logger, writer := Fixture(WarningLevel)
+	logger, writer := LoggerFixture(WarningLevel)
 
 	logger.Warning("This is a test.")
 	expected := "testing.WARNING This is a test."
@@ -83,7 +90,7 @@ func TestLevels(t *testing.T) {
 
 // TestEnabled -
 func TestEnabled(t *testing.T) {
-	logger, writer := Fixture(DebugLevel)
+	logger, writer := LoggerFixture(DebugLevel)
 	expected := "testing.DEBUG This is a test."
 
 	logger.Debug("This is a test.")
@@ -134,7 +141,7 @@ func TestDefaults(t *testing.T) {
 
 // TestClose -
 func TestClose(t *testing.T) {
-	logger, _ := Fixture(DebugLevel)
+	logger, _ := LoggerFixture(DebugLevel)
 	if !logger.Writable() {
 		t.Error("Expected Writable() to be true.")
 	}
@@ -143,7 +150,7 @@ func TestClose(t *testing.T) {
 	if logger.Writable() {
 		t.Error("Expected Writable() to be false.")
 	}
-	
+
 	if !logger.Closed() {
 		t.Error("Expected Closed() to return true.")
 	}
