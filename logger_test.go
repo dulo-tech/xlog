@@ -19,10 +19,17 @@ var methods = map[Level]string{
 	EmergencyLevel: "Emergency",
 }
 
-func TestLevelCalls(t *testing.T) {
+// Fixture creates and returns a new logger and writer.
+func Fixture(level Level) (*Logger, *MemoryWriter) {
 	writer := NewMemoryWriter()
 	logger := NewLogger("testing")
-	logger.AppendWriter(writer, DebugLevel)
+	logger.AppendWriter(writer, level)
+	
+	return logger, writer
+}
+
+func TestLevelCalls(t *testing.T) {
+	logger, writer := Fixture(DebugLevel)
 	
 	for level, method := range methods {
 		writer.Clear()
@@ -37,9 +44,7 @@ func TestLevelCalls(t *testing.T) {
 }
 
 func TestLevels(t *testing.T) {
-	writer := NewMemoryWriter()
-	logger := NewLogger("testing")
-	logger.AppendWriter(writer, WarningLevel)
+	logger, writer := Fixture(WarningLevel)
 
 	expected := "testing.WARNING This is a test."
 	logger.Warning(expected)
@@ -64,9 +69,7 @@ func TestLevels(t *testing.T) {
 }
 
 func TestEnabled(t *testing.T) {
-	writer := NewMemoryWriter()
-	logger := NewLogger("testing")
-	logger.AppendWriter(writer, DebugLevel)
+	logger, writer := Fixture(DebugLevel)
 
 	expected := "testing.DEBUG This is a test."
 	logger.Debug(expected)
@@ -130,7 +133,7 @@ func TestDefaults(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	logger := NewLogger("testing")
+	logger, _ := Fixture(DebugLevel)
 	if !logger.Writable() {
 		t.Error("Expected Writable() to be true.")
 	}
