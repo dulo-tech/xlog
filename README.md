@@ -9,7 +9,7 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 * [Global Configuration](#global-configuration)
 * [Global Logger](#global-logger)
 * [Custom Formatters](#custom-formatters)
-* [Custom Level Behavior](#custom-level-behavior)
+* [Custom Container](#custom-container)
 * [Loggable Interface](#loggable-interface)
 * [License](#license)
 
@@ -501,7 +501,7 @@ type LoggerContainer interface {
 }
 ```
 
-#### Custom Level Behavior
+#### Custom Container
 By default when you log a message to `xlog.DebugLevel`, the message is written
 to all files added at the `xlog.DebugLevel` level *and greater*. The
 `xlog.LoggerContainer.FindByLevel()` method is responsible for returning loggers registered
