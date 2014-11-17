@@ -149,6 +149,26 @@ func TestLevelCalls(t *testing.T) {
 			ActualIsEmpty(t, writer.String())
 		}
 	}
+
+	logger, writer := LoggerFixture(WarningLevel | InfoLevel)
+	logger.Debug("This is a test.")
+	ActualIsEmpty(t, writer.String())
+	
+	writer.Clear()
+	logger.Info("This is a test.")
+	ActualIsNotEmpty(t, writer.String())
+
+	writer.Clear()
+	logger.Notice("This is a test.")
+	ActualIsEmpty(t, writer.String())
+
+	writer.Clear()
+	logger.Warning("This is a test.")
+	ActualIsNotEmpty(t, writer.String())
+
+	writer.Clear()
+	logger.Error("This is a test.")
+	ActualIsNotEmpty(t, writer.String())
 }
 
 // TestLevels -

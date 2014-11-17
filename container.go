@@ -24,7 +24,7 @@ func NewDefaultLoggerContainer() *DefaultLoggerContainer {
 // Append adds a logger to the container at the given level.
 func (m *DefaultLoggerContainer) Append(logger *log.Logger, level Level) {
 	for lev, _ := range m.loggers {
-		if lev >= level {
+		if (lev&level > 0) || (lev >= level) {
 			m.loggers[lev] = append(m.loggers[lev], logger)
 		}
 	}
