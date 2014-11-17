@@ -149,18 +149,16 @@ func main() {
 	logger = xlog.NewMultiLogger("testing", files, xdt.Debug)
     
     // Change the way the log messages are formatted. The xlog.Formatter interface
-    // requires a format string and a name. The format string defines how the
-    // log messages are formatted. The name is the same value you would pass to
-    // a new xdt.Logger instance. Several placeholders can be used in the format
+    // requires a format string. The format string defines how the
+    // log messages are formatted. Several placeholders can be used in the format
     // string, which will be replaced by actual values:
     //
     // {date} The datetime when the message was logged.
-    // {name} The name of the logger/formatter.
+    // {name} The name of the logger.
     // {level} A string representation of the log level.
     // {message} The message that was logged.
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date} {name} - {level} - {message}",
-        "testing",
     )
     
     // Outputs: 2014-11-15 09:54:16.278 testing - DEBUG - This is a debug test.
@@ -171,7 +169,6 @@ func main() {
     // See: http://golang.org/pkg/time/#Time.Format
     logger.Formatter = xlog.NewDefaultFormatter(
         "{date|Jan _2 15:04:05} {level} {message}",
-        "testing",
     )
     
     // Outputs: Nov 15 09:56:56 DEBUG Test debug message.
@@ -180,7 +177,6 @@ func main() {
     // Creating a logger with a pre-configured formatter.
     formatter := xlog.NewDefaultFormatter(
         "{date} {name} [{level}] {message}",
-        "testing",
     )
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.DebugLevel)
@@ -188,10 +184,8 @@ func main() {
     // Outputs: 2014-11-15 09:59:32.427 testing [DEBUG] Test debug message.
     logger.Debug("Test debug message.")
     
-    // The message format can be changed without setting a new Formatter. The
-    // name can be changed as well.
+    // The message format can be changed without setting a new Formatter.
     logger.Formatter.SetMessageFormat("{date} {message}")
-    logger.Formatter.SetName("debug-testing")
 }
 ```
 
@@ -428,14 +422,8 @@ the `xlog.Formatter` interface, which has the following signature:
 
 ```go
 type Formatter interface {
-    // Name returns the name of the formatter.
-    Name() string
-    
-    // SetName sets the name of the formatter.
-	SetName(name string)
-	
 	// Format formats a log message for the given level.
-	Format(level Level, v ...interface{}) string
+	Format(name string, level Level, v ...interface{}) string
 }
 ```
 
@@ -452,27 +440,16 @@ import "github.com/dulo-tech/xlog"
 // NullFormatter implements the xlog.Formatter interface where all
 // log messages are discarded.
 type NullFormatter struct {
-	name string
-}
-
-// Name returns the name of the formatter.
-func (f *NullFormatter) Name() string {
-    return f.name
-}
-
-// SetName sets the name of the formatter.
-func (f *NullFormatter) SetName(name string) {
-	f.name = name
 }
 
 // Format formats a log message for the given level.
-func (f *NullFormatter) Format(level Level, v ...interface{}) string {
+func (f *NullFormatter) Format(name string, level Level, v ...interface{}) string {
     return ""
 }
 
 func main() {
     // Creating a logger which discards all messages.
-    formatter := &NullFormatter{""}
+    formatter := &NullFormatter{}
     logger = xlog.NewFormattedLogger(formatter)
     logger.Append("stdout", xlog.DebugLevel)
     
@@ -571,6 +548,9 @@ the struct `xlog.DefaultLogger`, which implements the `xlog.Loggable` interface.
 
 ```go
 type Loggable interface {
+	Name() string
+	Writable() bool
+	Closed() bool
 	Log(level Level, v ...interface{})
 	Logf(level Level, format string, v ...interface{})
 	Debug(v ...interface{})

@@ -8,10 +8,13 @@ import (
 	"io"
 )
 
+// LoggerName is the default name for the test logger.
+const LoggerName = "testing"
+
 // Fixture creates and returns a new logger and writer.
 func Fixture(level Level) (*DefaultLogger, *MemoryWriter) {
 	writer := NewMemoryWriter()
-	logger := NewLogger("testing")
+	logger := NewLogger(LoggerName)
 	logger.AppendWriter(writer, level)
 
 	return logger, writer
@@ -28,6 +31,14 @@ func ActualContains(t *testing.T, actual, expected string) {
 func ActualIsNotEmpty(t *testing.T, actual string) {
 	if actual != "" {
 		t.Errorf("Expected empty string but got '%s'.", actual)
+	}
+}
+
+// TestName -
+func TestName(t *testing.T) {
+	logger, _ := Fixture(DebugLevel)
+	if logger.Name() != LoggerName {
+		t.Errorf("Expected a logger named '%s'.", LoggerName)
 	}
 }
 
@@ -94,7 +105,7 @@ func TestAliases(t *testing.T) {
 	writer := NewMemoryWriter()
 	Aliases["stdout"] = writer
 
-	logger := NewLogger("testing")
+	logger := NewLogger(LoggerName)
 	logger.Append("stdout", DebugLevel)
 	logger.Debug("This is a test.")
 	expected := "testing.DEBUG This is a test."
@@ -107,7 +118,7 @@ func TestDefaults(t *testing.T) {
 	DefaultMessageFormat = "{level} - {message}"
 	DefaultAppendLevel = WarningLevel
 	DefaultAppendWriters = []io.Writer{writer}
-	logger := NewLogger("testing")
+	logger := NewLogger(LoggerName)
 
 	logger.Warning("This is a test.")
 	expected := "WARNING - This is a test.\n"
@@ -131,6 +142,10 @@ func TestClose(t *testing.T) {
 	logger.Close()
 	if logger.Writable() {
 		t.Error("Expected Writable() to be false.")
+	}
+	
+	if !logger.Closed() {
+		t.Error("Expected Closed() to return true.")
 	}
 }
 

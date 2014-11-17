@@ -18,6 +18,9 @@ type DefaultLogger struct {
 	// Loggers holds the appended file loggers.
 	Loggers LoggerMap
 
+	// name defines the name of the logger.
+	name string
+
 	// pointers contains any files that have been opened for logging.
 	pointers []*os.File
 
@@ -28,8 +31,9 @@ type DefaultLogger struct {
 // NewLogger returns a *DefaultLogger instance that's been initialized with default values.
 func NewLogger(name string) *DefaultLogger {
 	logger := &DefaultLogger{
+		name: name,
 		Enabled: true,
-		Formatter: NewDefaultFormatter(DefaultMessageFormat, name),
+		Formatter: NewDefaultFormatter(DefaultMessageFormat),
 		Loggers: NewDefaultLoggerMap(),
 		pointers: make([]*os.File, 0),
 		closed: false,
@@ -67,10 +71,37 @@ func NewFormattedLogger(formatter Formatter) *DefaultLogger {
 	return logger
 }
 
-// SetName sets the name of the logger.
-func (l *DefaultLogger) SetName(name string) {
-	l.Formatter.SetName(name)
+// Name returns the name of the logger.
+func (l *DefaultLogger) Name() string {
+	return l.name
 }
+
+// Writable returns true when logging is enabled, and the logger hasn't been closed.
+func (l *DefaultLogger) Writable() bool {
+	return l.Enabled && !l.closed
+}
+
+// Closed returns whether the logger has been closed.
+func (l *DefaultLogger) Closed() bool {
+	return l.closed
+}
+
+// Close disables logging and frees up resources used by the logger.
+// Note this method only closes files opened by the logger. It's the user's
+// responsibility to close files that were passed to the logger via the
+// AppendWriter method.
+func (l *DefaultLogger) Close() {
+	if !l.closed {
+		for _, pointer := range l.pointers {
+			pointer.Close()
+		}
+
+		l.Enabled = false
+		l.Loggers = nil
+		l.pointers = nil
+	}
+}
+
 
 // Append adds a file that will be written to at the given level or greater.
 // The file argument may be either the full path to a system file, or one of the
@@ -111,32 +142,11 @@ func (l *DefaultLogger) ClearAppended() {
 	l.Loggers.Clear()
 }
 
-// Close disables logging and frees up resources used by the logger.
-// Note this method only closes files opened by the logger. It's the user's
-// responsibility to close files that were passed to the logger via the
-// AppendWriter method.
-func (l *DefaultLogger) Close() {
-	if !l.closed {
-		for _, pointer := range l.pointers {
-			pointer.Close()
-		}
-
-		l.Enabled = false
-		l.Loggers = nil
-		l.pointers = nil
-	}
-}
-
-// Writable returns true when logging is enabled, and the logger hasn't been closed.
-func (l *DefaultLogger) Writable() bool {
-	return l.Enabled && !l.closed
-}
-
 // Log writes the message to each logger appended at the given level or higher.
 // Arguments are handled in the manner of fmt.Print.
 func (l *DefaultLogger) Log(level Level, v ...interface{}) {
 	if l.Writable() {
-		message := l.Formatter.Format(level, v...)
+		message := l.Formatter.Format(l.name, level, v...)
 		if message != "" {
 			for _, logger := range l.Loggers.FindByLevel(level) {
 				logger.Print(message)

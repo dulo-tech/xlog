@@ -48,7 +48,7 @@ func Close() {
 
 // SetName sets the name of the global logger.
 func SetName(name string) {
-	Instance().SetName(name)
+	Instance().name = name
 }
 
 // SetFormatter sets the formatter used by the global logger.

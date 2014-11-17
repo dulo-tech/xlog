@@ -9,22 +9,19 @@ import (
 
 // Formatter is an interface that provides methods that format log messages.
 type Formatter interface {
-	Name() string
-	SetName(name string)
-	Format(level Level, v ...interface{}) string
+	Format(name string, level Level, v ...interface{}) string
 }
 
 // DefaultFormatter is the default implementation of the Formatter interface.
 type DefaultFormatter struct {
 	messageFormat string
 	dateFormat    string
-	name          string
 }
 
 // NewDefaultFormatter creates and returns a new DefaultFormatter instance.
-func NewDefaultFormatter(messageFormat, name string) *DefaultFormatter {
+func NewDefaultFormatter(messageFormat string) *DefaultFormatter {
 	messageFormat, dateFormat := SanitizeForDate(messageFormat)
-	return &DefaultFormatter{messageFormat, dateFormat, name}
+	return &DefaultFormatter{messageFormat, dateFormat}
 }
 
 // SetMessageFormat changes the set message format.
@@ -32,24 +29,13 @@ func (f *DefaultFormatter) SetMessageFormat(messageFormat string) {
 	f.messageFormat, f.dateFormat = SanitizeForDate(messageFormat)
 }
 
-// SetName sets the name of the formatter. The name is available in messages
-// using the {name} placeholder.
-func (f *DefaultFormatter) SetName(name string) {
-	f.name = name
-}
-
-// Name returns the name of the formatter.
-func (f *DefaultFormatter) Name() string {
-	return f.name
-}
-
 // Format formats a log message for the given level.
-func (f *DefaultFormatter) Format(level Level, v ...interface{}) string {
+func (f *DefaultFormatter) Format(name string, level Level, v ...interface{}) string {
 	placeholders := map[string]string{
 		"{date}": (time.Now()).Format(f.dateFormat),
 		"{level}": Levels[level],
 		"{message}": fmt.Sprint(v...),
-		"{name}": f.name,
+		"{name}": name,
 	}
 
 	formatted := f.messageFormat
