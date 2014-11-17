@@ -99,6 +99,7 @@ func (l *DefaultLogger) Close() {
 		l.Enabled = false
 		l.Loggers = nil
 		l.pointers = nil
+		l.closed = true
 	}
 }
 
