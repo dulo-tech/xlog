@@ -5,7 +5,7 @@ import "log"
 // LoggerContainer is an interface that stores a container of log levels and loggers.
 type LoggerContainer interface {
 	Append(logger *log.Logger, level Level)
-	FindByLevel(level Level) []*log.Logger
+	Get(level Level) []*log.Logger
 	Clear()
 }
 
@@ -30,8 +30,8 @@ func (m *DefaultLoggerContainer) Append(logger *log.Logger, level Level) {
 	}
 }
 
-// FindByLevel returns the loggers at the given level or higher.
-func (m *DefaultLoggerContainer) FindByLevel(level Level) []*log.Logger {
+// Get returns the loggers at the given level or higher.
+func (m *DefaultLoggerContainer) Get(level Level) []*log.Logger {
 	return m.loggers[level]
 }
 

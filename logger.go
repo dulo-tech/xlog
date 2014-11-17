@@ -148,7 +148,7 @@ func (l *DefaultLogger) Log(level Level, v ...interface{}) {
 	if l.Writable() {
 		message := l.Formatter.Format(l.name, level, v...)
 		if message != "" {
-			for _, logger := range l.Container.FindByLevel(level) {
+			for _, logger := range l.Container.Get(level) {
 				logger.Print(message)
 			}
 		}

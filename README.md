@@ -492,9 +492,9 @@ type LoggerContainer interface {
     // Append adds a logger to the container for the given level.
 	Append(logger *log.Logger, level Level)
 	
-	// FindByLevel returns all the loggers added to the container at the given level
+	// Get returns all the loggers added to the container at the given level
 	// or greater.
-	FindByLevel(level Level) []*log.Logger
+	Get(level Level) []*log.Logger
 	
     // Clear removes all the appended loggers.
     Clear()
@@ -504,7 +504,7 @@ type LoggerContainer interface {
 #### Custom Container
 By default when you log a message to `xlog.DebugLevel`, the message is written
 to all files added at the `xlog.DebugLevel` level *and greater*. The
-`xlog.LoggerContainer.FindByLevel()` method is responsible for returning loggers registered
+`xlog.LoggerContainer.Get()` method is responsible for returning loggers registered
 at a given level and all those registered at greater levels.
 
 If you wanted logs written at a given level to only be written at that level, and
@@ -538,8 +538,8 @@ func (m *CustomLoggerContainer) Append(logger *log.Logger, level xlog.Level) {
     m.loggers[level] = append(m.loggers[level], logger)
 }
 
-// FindByLevel returns the loggers at the given level, and only the given level.
-func (m *CustomLoggerContainer) FindByLevel(level xlog.Level) []*log.Logger {
+// Get returns the loggers at the given level, and only the given level.
+func (m *CustomLoggerContainer) Get(level xlog.Level) []*log.Logger {
 	return m.loggers[level]
 }
 
