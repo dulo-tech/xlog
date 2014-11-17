@@ -8,108 +8,100 @@ import (
 	"io"
 )
 
-var methods = map[Level]string{
-	DebugLevel: "Debug",
-	InfoLevel: "Info",
-	NoticeLevel: "Notice",
-	WarningLevel: "Warning",
-	ErrorLevel: "Error",
-	CriticalLevel: "Critical",
-	AlertLevel: "Alert",
-	EmergencyLevel: "Emergency",
-}
-
 // Fixture creates and returns a new logger and writer.
 func Fixture(level Level) (*Logger, *MemoryWriter) {
 	writer := NewMemoryWriter()
 	logger := NewLogger("testing")
 	logger.AppendWriter(writer, level)
-	
+
 	return logger, writer
 }
 
+// ActualContains asserts that actual contains the sub-string expected.
+func ActualContains(t *testing.T, actual, expected string) {
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected actual '%s' to contain expected '%s'.", actual, expected)
+	}
+}
+
+// ActualIsNotEmpty assets that actual is not an empty string.
+func ActualIsNotEmpty(t *testing.T, actual string) {
+	if actual != "" {
+		t.Errorf("Expected empty string but got '%s'.", actual)
+	}
+}
+
+// TestLevelCalls -
 func TestLevelCalls(t *testing.T) {
 	logger, writer := Fixture(DebugLevel)
+	var methods = map[Level]string{
+		DebugLevel: "Debug",
+		InfoLevel: "Info",
+		NoticeLevel: "Notice",
+		WarningLevel: "Warning",
+		ErrorLevel: "Error",
+		CriticalLevel: "Critical",
+		AlertLevel: "Alert",
+		EmergencyLevel: "Emergency",
+	}
 	
 	for level, method := range methods {
 		writer.Clear()
 		Invoke(logger, method, "This is a test.")
-		
 		expected := fmt.Sprintf("testing.%s This is a test.", Levels[level])
-		actual := writer.String()
-		if !strings.Contains(actual, expected) {
-			t.Errorf("Expected '%s' to contain '%s'.", actual, expected)
-		}
+		ActualContains(t, writer.String(), expected)
 	}
 }
 
+// TestLevels -
 func TestLevels(t *testing.T) {
 	logger, writer := Fixture(WarningLevel)
 
+	logger.Warning("This is a test.")
 	expected := "testing.WARNING This is a test."
-	logger.Warning(expected)
-	actual := writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
+	ActualContains(t, writer.String(), expected)
 
+	logger.Critical("This is a test.")
 	expected = "testing.CRITICAL This is a test."
-	logger.Critical(expected)
-	actual = writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
-	
+	ActualContains(t, writer.String(), expected)
+
 	writer.Clear()
 	logger.Debug("This is a test.")
-	actual = writer.String()
-	if actual != "" {
-		t.Errorf("Expected an empty string but got '%s'.", actual)
-	}
+	ActualIsNotEmpty(t, writer.String())
 }
 
+// TestEnabled -
 func TestEnabled(t *testing.T) {
 	logger, writer := Fixture(DebugLevel)
-
 	expected := "testing.DEBUG This is a test."
-	logger.Debug(expected)
-	actual := writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
+
+	logger.Debug("This is a test.")
+	ActualContains(t, writer.String(), expected)
 
 	writer.Clear()
 	logger.Enabled = false
 	logger.Debug("This is a test.")
-	actual = writer.String()
-	if actual != "" {
-		t.Errorf("Expected an empty string but got '%s'.", actual)
-	}
+	ActualIsNotEmpty(t, writer.String())
 
 	writer.Clear()
 	logger.Enabled = true
 	logger.Debug(expected)
-	actual = writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
+	ActualContains(t, writer.String(), expected)
 }
 
+// TestAliases -
 func TestAliases(t *testing.T) {
 	writer := NewMemoryWriter()
 	Aliases["stdout"] = writer
-	
+
 	logger := NewLogger("testing")
 	logger.Append("stdout", DebugLevel)
-
+	logger.Debug("This is a test.")
 	expected := "testing.DEBUG This is a test."
-	logger.Debug(expected)
-	actual := writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
+	ActualContains(t, writer.String(), expected)
 }
 
+// TestDefaults -
 func TestDefaults(t *testing.T) {
 	writer := NewMemoryWriter()
 	DefaultMessageFormat = "{level} - {message}"
@@ -123,47 +115,44 @@ func TestDefaults(t *testing.T) {
 	if expected != actual {
 		t.Errorf("Expected '%s' to equal '%s'.", expected, actual)
 	}
-	
+
 	writer.Clear()
 	logger.Debug("This is a test.")
-	actual = writer.String()
-	if actual != "" {
-		t.Errorf("Expected an empty string but go '%s'.", actual)
-	}
+	ActualIsNotEmpty(t, writer.String())
 }
 
+// TestClose -
 func TestClose(t *testing.T) {
 	logger, _ := Fixture(DebugLevel)
 	if !logger.Writable() {
 		t.Error("Expected Writable() to be true.")
 	}
-	
+
 	logger.Close()
 	if logger.Writable() {
 		t.Error("Expected Writable() to be false.")
 	}
 }
 
+// TestInstance -
 func TestInstance(t *testing.T) {
 	if Instance() != Instance() {
 		t.Error("Expected the same instance from Instance().")
 	}
-	
+
 	writer := NewMemoryWriter()
 	AppendWriter(writer, DebugLevel)
 
 	expected := "testing.DEBUG This is a test."
 	Debug(expected)
-	actual := writer.String()
-	if !strings.Contains(actual, expected) {
-		t.Errorf("Expected '%s' to contain '%s'.", expected, actual)
-	}
+	ActualContains(t, writer.String(), expected)
 }
 
+// TestGetLogger -
 func TestGetLogger(t *testing.T) {
 	loggerA := GetLogger("a")
 	loggerB := GetLogger("b")
-	
+
 	if loggerA != GetLogger("a") {
 		t.Error("Expected the same instance for loggerA.")
 	}
@@ -175,7 +164,7 @@ func TestGetLogger(t *testing.T) {
 	}
 }
 
-
+// Invoke calls the named method on any interface with the given arguments.
 func Invoke(any interface{}, name string, args... interface{}) {
 	inputs := make([]reflect.Value, len(args))
 	for i, _ := range args {
@@ -183,6 +172,8 @@ func Invoke(any interface{}, name string, args... interface{}) {
 	}
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
+
+// MemoryWriter -
 
 type MemoryWriter struct {
 	Data []byte
@@ -198,11 +189,9 @@ func (w *MemoryWriter) Write(p []byte) (n int, err error) {
 	w.Size = len(p)
 	return w.Size, nil
 }
-
 func (w *MemoryWriter) String() string {
 	return string(w.Data[:w.Size])
 }
-
 func (w *MemoryWriter) Clear() {
 	w.Data = nil
 	w.Size = 0
