@@ -19,6 +19,18 @@ const (
 	EmergencyLevel   = 1 << iota
 )
 
+// levelOrder defines the order of the levels.
+var levelOrder = []Level{
+	DebugLevel,
+	InfoLevel,
+	NoticeLevel,
+	WarningLevel,
+	ErrorLevel,
+	CriticalLevel,
+	AlertLevel,
+	EmergencyLevel,
+}
+
 // Levels maps Level to a string representation.
 var Levels = map[Level]string{
 	DebugLevel: "DEBUG",
@@ -29,6 +41,26 @@ var Levels = map[Level]string{
 	CriticalLevel: "CRITICAL",
 	AlertLevel: "ALERT",
 	EmergencyLevel: "EMERGENCY",
+}
+
+// IsGreaterLevel returns whether the level is_greater_than is greater than that.
+func IsGreaterLevel(is_greater_than, that Level) bool {
+	return searchForLevel(is_greater_than) > searchForLevel(that)
+}
+
+// IsLesserLevel returns whether the level is_less_than is less than that.
+func IsLesserLevel(is_less_than, that Level) bool {
+	return searchForLevel(is_less_than) < searchForLevel(that)
+}
+
+// searchForLevel returns the index for the given level or -1.
+func searchForLevel(level Level) int {
+	for idx, val := range levelOrder {
+		if val == level {
+			return idx
+		}
+	}
+	panic("Invalid level.")
 }
 
 // Aliases maps file aliases to real file pointers.

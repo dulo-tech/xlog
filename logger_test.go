@@ -4,8 +4,8 @@ import (
 	"testing"
 	"reflect"
 	"strings"
-	"fmt"
 	"io"
+	"fmt"
 )
 
 // LoggerName is the default name for the test logger.
@@ -48,12 +48,36 @@ func ActualIsNotEmpty(t *testing.T, actual string) {
 	}
 }
 
+// ActualLevelGreaterThan asserts the actual level is greater than the expected.
+func ActualLevelGreaterThan(t *testing.T, actual, expected Level) {
+	if !IsGreaterLevel(actual, expected) {
+		t.Errorf("Expected level %s to be greater than %s.", Levels[actual], Levels[expected])
+	}
+}
+
+// ActualLevelLessThan asserts the actual level is less than the expected.
+func ActualLevelLessThan(t *testing.T, actual, expected Level) {
+	if !IsLesserLevel(actual, expected) {
+		t.Errorf("Expected level %s to be less than %s.", Levels[actual], Levels[expected])
+	}
+}
+
 // TestName -
 func TestName(t *testing.T) {
 	logger, _ := LoggerFixture(DebugLevel)
 	if logger.Name() != LoggerName {
 		t.Errorf("Expected a logger named '%s'.", LoggerName)
 	}
+}
+
+// TestGreater -
+func TestGreater(t *testing.T) {
+	ActualLevelGreaterThan(t, EmergencyLevel, DebugLevel)
+	ActualLevelGreaterThan(t, AlertLevel, InfoLevel)
+	ActualLevelGreaterThan(t, InfoLevel, DebugLevel)
+	ActualLevelLessThan(t, DebugLevel, ErrorLevel)
+	ActualLevelLessThan(t, InfoLevel, WarningLevel)
+	ActualLevelLessThan(t, AlertLevel, EmergencyLevel)
 }
 
 type LevelCall struct {
