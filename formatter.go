@@ -9,6 +9,8 @@ import (
 
 // Formatter is an interface that provides methods that format log messages.
 type Formatter interface {
+	SetFormat(format string)
+	PlaceholderFunc(key string, f func(string) string)
 	Format(name string, level Level, v ...interface{}) string
 }
 
@@ -16,17 +18,24 @@ type Formatter interface {
 type DefaultFormatter struct {
 	messageFormat string
 	dateFormat    string
+	funcs  map[string]func(string) string
 }
 
 // NewDefaultFormatter creates and returns a new DefaultFormatter instance.
 func NewDefaultFormatter(messageFormat string) *DefaultFormatter {
 	messageFormat, dateFormat := SanitizeForDate(messageFormat)
-	return &DefaultFormatter{messageFormat, dateFormat}
+	placeholders := make(map[string]func(string) string)
+	return &DefaultFormatter{messageFormat, dateFormat, placeholders}
 }
 
-// SetMessageFormat changes the set message format.
-func (f *DefaultFormatter) SetMessageFormat(messageFormat string) {
-	f.messageFormat, f.dateFormat = SanitizeForDate(messageFormat)
+// SetFormat changes the set message format.
+func (f *DefaultFormatter) SetFormat(format string) {
+	f.messageFormat, f.dateFormat = SanitizeForDate(format)
+}
+
+// PlaceholderFunc adds a callback function which provides a replacement for key in a string format.
+func (f *DefaultFormatter) PlaceholderFunc(key string, fn func(string) string) {
+	f.funcs[key] = fn
 }
 
 // Format formats a log message for the given level.
@@ -37,10 +46,13 @@ func (f *DefaultFormatter) Format(name string, level Level, v ...interface{}) st
 		"{message}": fmt.Sprint(v...),
 		"{name}": name,
 	}
-
+	
 	formatted := f.messageFormat
 	for placeholder, value := range placeholders {
 		formatted = strings.Replace(formatted, placeholder, value, -1)
+	}
+	for key, fn := range f.funcs {
+		formatted = strings.Replace(formatted, "{" + key + "}", fn(key), -1)
 	}
 
 	return formatted

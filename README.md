@@ -186,6 +186,15 @@ func main() {
     
     // The message format can be changed without setting a new Formatter.
     logger.Formatter.SetMessageFormat("{date} {message}")
+    
+    // In addition to the default placeholders like {date} and {message}, you
+    // can also define your own. The Formatter.PlaceholderFunc() takes the value
+    // for the placeholder, and a function which returns the value. Below we
+    // define the placeholder {hostname} which will be replaced by the OS hostname.
+    logger.Formatter.PlaceholderFunc("hostname", func(key string) string {
+        h, _ := os.Hostname()
+        return h
+    })
 }
 ```
 
@@ -422,6 +431,12 @@ the `xlog.Formatter` interface, which has the following signature:
 
 ```go
 type Formatter interface {
+    // SetFormat changes the set message format.
+    SetFormat(format string)
+    
+    // PlaceholderFunc adds a callback function which provides a replacement for key in a string format.
+    PlaceholderFunc(key string, f func(string) string)
+    
 	// Format formats a log message for the given level.
 	Format(name string, level Level, v ...interface{}) string
 }
@@ -440,6 +455,14 @@ import "github.com/dulo-tech/xlog"
 // NullFormatter implements the xlog.Formatter interface where all
 // log messages are discarded.
 type NullFormatter struct {
+}
+
+// SetFormat changes the set message format.
+func (f *NullFormatter) SetFormat(format string) {
+}
+
+// PlaceholderFunc adds a callback function which provides a replacement for key in a string format.
+func PlaceholderFunc(key string, f func(string) string) {
 }
 
 // Format formats a log message for the given level.
