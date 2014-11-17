@@ -9,7 +9,7 @@ import (
 )
 
 // Fixture creates and returns a new logger and writer.
-func Fixture(level Level) (*Logger, *MemoryWriter) {
+func Fixture(level Level) (*DefaultLogger, *MemoryWriter) {
 	writer := NewMemoryWriter()
 	logger := NewLogger("testing")
 	logger.AppendWriter(writer, level)

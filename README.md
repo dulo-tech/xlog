@@ -364,7 +364,7 @@ func main() {
 The `xlog.GetLogger()` function gives you the ease of a global logger, with
 the flexibility of named loggers. The function acts like a factory and global
 registry, which is useful when you have hundreds or even thousands of objects
-that need a logger, but you don't want to create thousands of *Logger instances.
+that need a logger, but you don't want to create thousands of *DefaultLogger instances.
 
 ```go
 package main
@@ -377,7 +377,7 @@ import (
 func main() {
     // The first call to xlog.GetLogger() with the name "a" creates a
     // new logger for the name and returns it. The next time you call the
-    // function with the same name, the same *Logger instance is returned.
+    // function with the same name, the same *DefaultLogger instance is returned.
     loggerA := xlog.GetLogger("a")
     loggerA.Append("stdout", xlog.DebugLevel)
     if loggerA == xlog.GetLogger("a") {
@@ -481,8 +481,8 @@ func main() {
 }
 ```
 
-Internally the `xlog` package uses the standard Go logger, `log.Logger`. An instance
-of `log.Logger` is created for each file you append to the logger. The `log.Logger`
+Internally the `xlog` package uses the standard Go logger, `log.DefaultLogger`. An instance
+of `log.DefaultLogger` is created for each file you append to the logger. The `log.Logger`
 instances are managed by the `xlog.LoggerMap` interface, which stores the loggers
 and makes them retrievable by level. The `xlog.LoggerMap` interface has the
 following signature:
@@ -567,7 +567,7 @@ func main() {
 
 #### Loggable Interface
 The `xlog.NewLogger()` method and other New methods return an instance of
-the struct `xlog.Logger`, which implements the `xlog.Loggable` interface.
+the struct `xlog.DefaultLogger`, which implements the `xlog.Loggable` interface.
 
 ```go
 type Loggable interface {
@@ -591,21 +591,21 @@ type Loggable interface {
 ```
 
 Note the absence of methods like `Append()`, `MultiAppend()`, `AppendWriter()`,
-and `Close()`, which are members of the `xlog.Logger` struct. The `xlog.Loggable`
+and `Close()`, which are members of the `xlog.DefaultLogger` struct. The `xlog.Loggable`
 interface does not concern itself for how a logger is configured or it's
 lifecycle. The `xlog.Loggable` interface only exposes methods for logging
 messages at various log levels.
 
-You are encouraged to reference `xlog.Loggable` instead of `xlog.Logger` in your
+You are encouraged to reference `xlog.Loggable` instead of `xlog.DefaultLogger` in your
 code to keep it flexible to future API changes. For example instead of creating
-a struct using `xlog.Logger` like this:
+a struct using `xlog.DefaultLogger` like this:
 
 ```go
 type WebScraper struct {
-    logger xlog.Logger
+    logger xlog.DefaultLogger
 }
 
-func NewWebScraper(logger *xlog.Logger) {
+func NewWebScraper(logger *xlog.DefaultLogger) {
     return &WebScraper{logger}
 }
 ```

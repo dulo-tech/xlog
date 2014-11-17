@@ -4,17 +4,17 @@ import "io"
 
 var (
 	// globalInstance stores the global logger.
-	globalInstance *Logger
+	globalInstance *DefaultLogger
 
 	// globalAppended stores whether files have been appended to the global logger.
 	globalAppended bool = false
 
 	// globalLoggers stores the loggers created by the GetLogger() function.
-	globalLoggers map[string]*Logger
+	globalLoggers map[string]*DefaultLogger
 )
 
 // Instance returns the global logger.
-func Instance() *Logger {
+func Instance() *DefaultLogger {
 	if globalInstance == nil {
 		globalInstance = NewLogger("xlog")
 		globalInstance.Append("stdout", DebugLevel)
@@ -24,12 +24,12 @@ func Instance() *Logger {
 	return globalInstance
 }
 
-// GetLogger returns the *Logger with the given name. The logger will be
-// created if it's not already been created. Only a single *Logger instance
+// GetLogger returns the *DefaultLogger with the given name. The logger will be
+// created if it's not already been created. Only a single *DefaultLogger instance
 // is created for a name.
-func GetLogger(name string) *Logger {
+func GetLogger(name string) *DefaultLogger {
 	if globalLoggers == nil {
-		globalLoggers = make(map[string]*Logger)
+		globalLoggers = make(map[string]*DefaultLogger)
 	}
 	if _, ok := globalLoggers[name]; !ok {
 		globalLoggers[name] = NewLogger(name)
