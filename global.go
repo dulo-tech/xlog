@@ -56,9 +56,9 @@ func SetFormatter(formatter Formatter) {
 	Instance().Formatter = formatter
 }
 
-// SetLoggerMap sets the logger map used by the global logger.
-func SetLoggerMap(lm LoggerMap) {
-	Instance().Loggers = lm
+// SetLoggerContainer sets the logger container used by the global logger.
+func SetLoggerContainer(lc LoggerContainer) {
+	Instance().Container = lc
 }
 
 // Enabled returns whether the global logger is enabled.

@@ -15,8 +15,8 @@ type DefaultLogger struct {
 	// Formatter is used to format the log messages.
 	Formatter Formatter
 
-	// Loggers holds the appended file loggers.
-	Loggers LoggerMap
+	// Container holds the appended file loggers.
+	Container LoggerContainer
 
 	// name defines the name of the logger.
 	name string
@@ -34,7 +34,7 @@ func NewLogger(name string) *DefaultLogger {
 		name: name,
 		Enabled: true,
 		Formatter: NewDefaultFormatter(DefaultMessageFormat),
-		Loggers: NewDefaultLoggerMap(),
+		Container: NewDefaultLoggerContainer(),
 		pointers: make([]*os.File, 0),
 		closed: false,
 	}
@@ -97,7 +97,7 @@ func (l *DefaultLogger) Close() {
 		}
 
 		l.Enabled = false
-		l.Loggers = nil
+		l.Container = nil
 		l.pointers = nil
 		l.closed = true
 	}
@@ -108,11 +108,11 @@ func (l *DefaultLogger) Close() {
 // aliases "stdout", "stdin", or "stderr".
 func (l *DefaultLogger) Append(file string, level Level) {
 	if w, ok := Aliases[file]; ok {
-		l.Loggers.Append(newLogger(w), level)
+		l.Container.Append(newLogger(w), level)
 	} else {
 		w := l.open(file)
 		if w != nil {
-			l.Loggers.Append(newLogger(w), level)
+			l.Container.Append(newLogger(w), level)
 			l.pointers = append(l.pointers, w)
 		}
 	}
@@ -127,7 +127,7 @@ func (l *DefaultLogger) MultiAppend(files []string, level Level) {
 
 // AppendWriter adds a writer that will be written to at the given level or greater.
 func (l *DefaultLogger) AppendWriter(writer io.Writer, level Level) {
-	l.Loggers.Append(newLogger(writer), level)
+	l.Container.Append(newLogger(writer), level)
 }
 
 // MultiAppendWriters adds one or more io.Writer instances to the logger.
@@ -139,7 +139,7 @@ func (l *DefaultLogger) MultiAppendWriters(writers []io.Writer, level Level) {
 
 // ClearAppended removes all the files that have been appended to the logger.
 func (l *DefaultLogger) ClearAppended() {
-	l.Loggers.Clear()
+	l.Container.Clear()
 }
 
 // Log writes the message to each logger appended at the given level or higher.
@@ -148,7 +148,7 @@ func (l *DefaultLogger) Log(level Level, v ...interface{}) {
 	if l.Writable() {
 		message := l.Formatter.Format(l.name, level, v...)
 		if message != "" {
-			for _, logger := range l.Loggers.FindByLevel(level) {
+			for _, logger := range l.Container.FindByLevel(level) {
 				logger.Print(message)
 			}
 		}
