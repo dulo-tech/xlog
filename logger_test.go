@@ -34,10 +34,17 @@ func ActualContains(t *testing.T, actual, expected string) {
 	}
 }
 
-// ActualIsNotEmpty assets that actual is not an empty string.
-func ActualIsNotEmpty(t *testing.T, actual string) {
+// ActualIsEmpty assets that actual is an empty string.
+func ActualIsEmpty(t *testing.T, actual string) {
 	if actual != "" {
 		t.Errorf("Expected empty string but got '%s'.", actual)
+	}
+}
+
+// ActualIsNotEmpty assets that actual is not an empty string
+func ActualIsNotEmpty(t *testing.T, actual string) {
+	if actual == "" {
+		t.Error("Expected non-empty string")
 	}
 }
 
@@ -49,25 +56,74 @@ func TestName(t *testing.T) {
 	}
 }
 
+type LevelCall struct {
+	method string
+	greater []Level
+	lower   []Level
+}
+
 // TestLevelCalls -
 func TestLevelCalls(t *testing.T) {
-	logger, writer := LoggerFixture(DebugLevel)
-	var methods = map[Level]string{
-		DebugLevel: "Debug",
-		InfoLevel: "Info",
-		NoticeLevel: "Notice",
-		WarningLevel: "Warning",
-		ErrorLevel: "Error",
-		CriticalLevel: "Critical",
-		AlertLevel: "Alert",
-		EmergencyLevel: "Emergency",
+	var calls = map[Level]LevelCall{
+		DebugLevel: LevelCall{
+			"Debug",
+			[]Level{InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
+			[]Level{},
+		},
+		InfoLevel: LevelCall{
+			"Info",
+			[]Level{NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
+			[]Level{DebugLevel},
+		},
+		NoticeLevel: LevelCall{
+			"Notice",
+			[]Level{WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
+			[]Level{DebugLevel, InfoLevel},
+		},
+		WarningLevel: LevelCall{
+			"Warning",
+			[]Level{ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
+			[]Level{DebugLevel, InfoLevel, NoticeLevel},
+		},
+		ErrorLevel: LevelCall{
+			"Error",
+			[]Level{CriticalLevel, AlertLevel, EmergencyLevel},
+			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel},
+		},
+		CriticalLevel: LevelCall{
+			"Critical",
+			[]Level{AlertLevel, EmergencyLevel},
+			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel},
+		},
+		AlertLevel: LevelCall{
+			"Alert",
+			[]Level{EmergencyLevel},
+			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel},
+		},
+		EmergencyLevel: LevelCall{
+			"Emergency",
+			[]Level{},
+			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel},
+		},
 	}
-
-	for level, method := range methods {
-		writer.Clear()
-		Invoke(logger, method, "This is a test.")
+	for level, call := range calls {
+		logger, writer := LoggerFixture(level)
+		
+		Invoke(logger, call.method, "This is a test.")
 		expected := fmt.Sprintf("testing.%s This is a test.", Levels[level])
 		ActualContains(t, writer.String(), expected)
+		
+		for _, greater_level := range call.greater {
+			writer.Clear()
+			Invoke(logger, calls[greater_level].method, "This is a test.")
+			expected := fmt.Sprintf("testing.%s This is a test.", Levels[greater_level])
+			ActualContains(t, writer.String(), expected)
+		}
+		for _, lower_level := range call.lower {
+			writer.Clear()
+			Invoke(logger, calls[lower_level].method, "This is a test.")
+			ActualIsEmpty(t, writer.String())
+		}
 	}
 }
 
@@ -85,7 +141,7 @@ func TestLevels(t *testing.T) {
 
 	writer.Clear()
 	logger.Debug("This is a test.")
-	ActualIsNotEmpty(t, writer.String())
+	ActualIsEmpty(t, writer.String())
 }
 
 // TestEnabled -
@@ -99,7 +155,7 @@ func TestEnabled(t *testing.T) {
 	writer.Clear()
 	logger.Enabled = false
 	logger.Debug("This is a test.")
-	ActualIsNotEmpty(t, writer.String())
+	ActualIsEmpty(t, writer.String())
 
 	writer.Clear()
 	logger.Enabled = true
@@ -136,7 +192,7 @@ func TestDefaults(t *testing.T) {
 
 	writer.Clear()
 	logger.Debug("This is a test.")
-	ActualIsNotEmpty(t, writer.String())
+	ActualIsEmpty(t, writer.String())
 }
 
 // TestClose -
