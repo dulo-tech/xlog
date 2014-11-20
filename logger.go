@@ -263,6 +263,11 @@ func (l *DefaultLogger) Emergencyf(format string, v ...interface{}) {
 	l.Logf(EmergencyLevel, format, v...)
 }
 
+// Writer returns a *LoggerWriter instance which wraps this logger.
+func (l *DefaultLogger) Writer(level Level) *LoggerWriter {
+	return NewLoggerWriter(l, level)
+}
+
 // open returns a file that logs can be written to.
 func (l *DefaultLogger) open(name string) *os.File {
 	w, err := os.OpenFile(name, FileOpenFlags, FileOpenMode)

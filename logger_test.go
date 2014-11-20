@@ -188,6 +188,16 @@ func TestLevels(t *testing.T) {
 	ActualIsEmpty(t, writer.String())
 }
 
+// TestWriter -
+func TestWriter(t *testing.T) {
+	logger, writer := LoggerFixture(DebugLevel)
+	lw := logger.Writer(DebugLevel)
+	
+	fmt.Fprint(lw, "This is a test.")
+	expected := "testing.DEBUG This is a test."
+	ActualContains(t, writer.String(), expected)
+}
+
 // TestEnabled -
 func TestEnabled(t *testing.T) {
 	logger, writer := LoggerFixture(DebugLevel)

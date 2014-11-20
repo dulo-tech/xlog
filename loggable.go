@@ -132,4 +132,5 @@ type Loggable interface {
 	Alertf(format string, v ...interface{})
 	Emergency(v ...interface{})
 	Emergencyf(format string, v ...interface{})
+	Writer(level Level) *LoggerWriter
 }
