@@ -1,7 +1,6 @@
 package xlog
 
 import (
-	"log"
 	"os"
 	"fmt"
 	"io"
@@ -56,12 +55,6 @@ type Settings struct {
 	// fails. When set to false, any file open errors are ignored, and the file won't be
 	// appended.
 	PanicOnFileErrors bool
-
-	// pointers contains any files that have been opened for logging.
-	pointers []*os.File
-
-	// closed defines whether the logger has been closed.
-	closed bool
 }
 
 // NewDefaultSettings returns a new *Settings instance.
@@ -73,8 +66,6 @@ func NewDefaultSettings(enabled bool) *Settings {
 		FileOpenFlags: DefaultFileOpenFlags,
 		FileOpenMode: DefaultFileOpenMode,
 		PanicOnFileErrors: DefaultPanicOnFileErrors,
-		pointers: make([]*os.File, 0, DefaultInitialCapacity),
-		closed: false,
 	}
 }
 
@@ -118,12 +109,12 @@ func NewWriters(name string, writers []io.Writer, level Level) *DefaultLogger {
 
 // Writable returns true when logging is enabled, and the logger hasn't been closed.
 func (l *DefaultLogger) Writable() bool {
-	return l.Enabled && !l.closed
+	return l.Enabled && !l.Settings.Container.Closed()
 }
 
 // Closed returns whether the logger has been closed.
 func (l *DefaultLogger) Closed() bool {
-	return l.closed
+	return l.Settings.Container.Closed()
 }
 
 // Close disables logging and frees up resources used by the logger.
@@ -131,16 +122,8 @@ func (l *DefaultLogger) Closed() bool {
 // responsibility to close files that were passed to the logger via the
 // AppendWriter method.
 func (l *DefaultLogger) Close() {
-	if !l.closed {
-		for _, pointer := range l.pointers {
-			pointer.Close()
-		}
-
-		l.Enabled = false
-		l.Container = nil
-		l.pointers = nil
-		l.closed = true
-	}
+	l.Settings.Container.Close()
+	l.Settings.Enabled = false
 }
 
 // Append adds a file that will be written to at the given level or greater.
@@ -148,12 +131,11 @@ func (l *DefaultLogger) Close() {
 // aliases "stdout", "stdin", or "stderr".
 func (l *DefaultLogger) Append(file string, level Level) {
 	if w, ok := Aliases[file]; ok {
-		l.Container.Append(newLogger(w), level)
+		l.Container.Append(w, level)
 	} else {
 		w := l.open(file)
 		if w != nil {
-			l.Container.Append(newLogger(w), level)
-			l.pointers = append(l.pointers, w)
+			l.Container.Append(w, level)
 		}
 	}
 }
@@ -167,7 +149,7 @@ func (l *DefaultLogger) MultiAppend(files []string, level Level) {
 
 // AppendWriter adds a writer that will be written to at the given level or greater.
 func (l *DefaultLogger) AppendWriter(writer io.Writer, level Level) {
-	l.Container.Append(newLogger(writer), level)
+	l.Container.Append(writer, level)
 }
 
 // MultiAppendWriters adds one or more io.Writer instances to the logger.
@@ -320,10 +302,5 @@ func (l *DefaultLogger) open(name string) *os.File {
 	}
 
 	return w
-}
-
-// newLogger returns a *log.Logger instance configured with the default options.
-func newLogger(w io.Writer) *log.Logger {
-	return log.New(w, "", 0)
 }
 

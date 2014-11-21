@@ -8,7 +8,6 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 * [Examples](#examples)
 * [Global Logger](#global-logger)
 * [Custom Formatters](#custom-formatters)
-* [Custom Container](#custom-container)
 * [Loggable Interface](#loggable-interface)
 * [License](#license)
 
@@ -369,89 +368,6 @@ func main() {
 }
 ```
 
-Internally the `xlog` package uses the standard Go logger, `log.DefaultLogger`. An instance
-of `log.DefaultLogger` is created for each file you append to the logger. The `log.Logger`
-instances are managed by the `xlog.Container` interface, which stores the loggers
-and makes them retrievable by level. The `xlog.Container` interface has the
-following signature:
-
-```go
-type Container interface {
-    // Append adds a logger to the container for the given level.
-	Append(logger *log.Logger, level Level)
-	
-	// Get returns all the loggers added to the container at the given level
-	// or greater.
-	Get(level Level) []*log.Logger
-	
-    // Clear removes all the appended loggers.
-    Clear()
-}
-```
-
-#### Custom Container
-By default when you log a message to `xlog.DebugLevel`, the message is written
-to all files added at the `xlog.DebugLevel` level *and greater*. The
-`xlog.Container.Get()` method is responsible for returning loggers registered
-at a given level and all those registered at greater levels.
-
-If you wanted logs written at a given level to only be written at that level, and
-not levels greater than it, you can implement your own logger map which changes
-the default behavior.
-
-
-```go
-package main
-
-import (
-    "log"
-    "github.com/dulo-tech/xlog"
-)
-
-// CustomContainer maps loggers to levels.
-type CustomContainer struct {
-	loggers map[xlog.Level][]*log.Logger
-}
-
-// NewCustomContainer creates and returns a *CustomContainer instance.
-func NewCustomContainer() *CustomContainer {
-    // Use the Clear() method to initialize the internal map.
-	lm := &CustomContainer{}
-	lm.Clear()
-	return lm
-}
-
-// Append adds a logger to the map at the given level.
-func (m *CustomContainer) Append(logger *log.Logger, level xlog.Level) {
-    m.loggers[level] = append(m.loggers[level], logger)
-}
-
-// Get returns the loggers at the given level, and only the given level.
-func (m *CustomContainer) Get(level xlog.Level) []*log.Logger {
-	return m.loggers[level]
-}
-
-// Clear removes all the appended loggers.
-func (m *CustomContainer) Clear() {
-    // Make the internal map the size of xlog.Levels, and initialize
-    // each slice to the default initial capacity.
-	m.loggers := make(map[xlog.Level][]*log.Logger, len(xlog.Levels))
-	for level, _ := range xlog.Levels {
-		m.loggers[level] = make([]*log.Logger, 0, xlog.InitialLoggerCapacity)
-	}
-}
-
-func main() {
-    // Creating a logger that uses the custom logger container.
-    lc := NewCustomContainer()
-    logger = xlog.New("testing")
-    logger.Container = lc
-    logger.Append("stdout", xlog.DebugLevel)
-    
-    // You can also set the custom container on the global logger.
-    xlog.SetContainer(lm)
-}
-```
 
 #### Loggable Interface
 The `xlog.New()` method and other New methods return an instance of
