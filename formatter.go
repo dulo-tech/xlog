@@ -22,15 +22,15 @@ type DefaultFormatter struct {
 }
 
 // NewDefaultFormatter creates and returns a new DefaultFormatter instance.
-func NewDefaultFormatter(messageFormat string) *DefaultFormatter {
-	messageFormat, dateFormat := SanitizeForDate(messageFormat)
+func NewDefaultFormatter(messageFormat, dateFormat string) *DefaultFormatter {
+	messageFormat, dateFormat = SanitizeForDate(messageFormat, dateFormat)
 	placeholders := make(map[string]func(string) string)
 	return &DefaultFormatter{messageFormat, dateFormat, placeholders}
 }
 
 // SetFormat changes the set message format.
 func (f *DefaultFormatter) SetFormat(format string) {
-	f.messageFormat, f.dateFormat = SanitizeForDate(format)
+	f.messageFormat, f.dateFormat = SanitizeForDate(format, f.dateFormat)
 }
 
 // PlaceholderFunc adds a callback function which provides a replacement for key in a string format.
@@ -61,9 +61,8 @@ func (f *DefaultFormatter) Format(name string, level Level, v ...interface{}) st
 // SanitizeForDate replaces date placeholders containing a date format with
 // a plain {date} placeholder. The altered message format is returned, along
 // with the found date format.
-func SanitizeForDate(messageFormat string) (string, string) {
+func SanitizeForDate(messageFormat, dateFormat string) (string, string) {
 	regex := regexp.MustCompile(`{date\|([^}]+)}`)
-	dateFormat := DefaultDateFormat
 	captured := regex.FindStringSubmatch(messageFormat)
 	if len(captured) == 2 {
 		dateFormat = captured[1]

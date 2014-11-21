@@ -2,27 +2,28 @@ package xlog
 
 import "log"
 
-// LoggerContainer is an interface that stores a container of log levels and loggers.
-type LoggerContainer interface {
+// Container is an interface that stores a container of log levels and loggers.
+type Container interface {
 	Append(logger *log.Logger, level Level)
 	Get(level Level) []*log.Logger
 	Clear()
 }
 
-// DefaultLoggerContainer maps loggers to levels.
-type DefaultLoggerContainer struct {
+// DefaultContainer maps loggers to levels.
+type DefaultContainer struct {
+	Capacity int
 	loggers map[Level][]*log.Logger
 }
 
-// NewDefaultLoggerContainer creates and returns a *DefaultLoggerContainer instance.
-func NewDefaultLoggerContainer() *DefaultLoggerContainer {
-	lm := &DefaultLoggerContainer{}
+// NewDefaultContainer creates and returns a *DefaultLoggerContainer instance.
+func NewDefaultContainer(capacity int) *DefaultContainer {
+	lm := &DefaultContainer{Capacity: capacity, loggers: nil}
 	lm.Clear()
 	return lm
 }
 
 // Append adds a logger to the container at the given level.
-func (m *DefaultLoggerContainer) Append(logger *log.Logger, level Level) {
+func (m *DefaultContainer) Append(logger *log.Logger, level Level) {
 	for lev, _ := range m.loggers {
 		if (lev&level > 0) || (lev >= level) {
 			m.loggers[lev] = append(m.loggers[lev], logger)
@@ -31,14 +32,14 @@ func (m *DefaultLoggerContainer) Append(logger *log.Logger, level Level) {
 }
 
 // Get returns the loggers at the given level or higher.
-func (m *DefaultLoggerContainer) Get(level Level) []*log.Logger {
+func (m *DefaultContainer) Get(level Level) []*log.Logger {
 	return m.loggers[level]
 }
 
 // Clear removes all the appended loggers.
-func (m *DefaultLoggerContainer) Clear() {
+func (m *DefaultContainer) Clear() {
 	m.loggers = make(map[Level][]*log.Logger, len(Levels))
 	for level, _ := range Levels {
-		m.loggers[level] = make([]*log.Logger, 0, InitialLoggerCapacity)
+		m.loggers[level] = make([]*log.Logger, 0, m.Capacity)
 	}
 }

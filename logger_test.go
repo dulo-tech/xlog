@@ -4,7 +4,6 @@ import (
 	"testing"
 	"reflect"
 	"strings"
-	"io"
 	"fmt"
 )
 
@@ -227,26 +226,6 @@ func TestAliases(t *testing.T) {
 	logger.Debug("This is a test.")
 	expected := "testing.DEBUG This is a test."
 	ActualContains(t, writer.String(), expected)
-}
-
-// TestDefaults -
-func TestDefaults(t *testing.T) {
-	writer := NewMemoryWriter()
-	DefaultMessageFormat = "{level} - {message}"
-	DefaultAppendLevel = WarningLevel
-	DefaultAppendWriters = []io.Writer{writer}
-	logger := New(LoggerName)
-
-	logger.Warning("This is a test.")
-	expected := "WARNING - This is a test.\n"
-	actual := writer.String()
-	if expected != actual {
-		t.Errorf("Expected '%s' to equal '%s'.", expected, actual)
-	}
-
-	writer.Clear()
-	logger.Debug("This is a test.")
-	ActualIsEmpty(t, writer.String())
 }
 
 // TestClose -

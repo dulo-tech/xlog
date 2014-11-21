@@ -6,7 +6,6 @@ Documentation is available from the [GoDoc website](http://godoc.org/github.com/
 
 * [Installation](#installation)
 * [Examples](#examples)
-* [Global Configuration](#global-configuration)
 * [Global Logger](#global-logger)
 * [Custom Formatters](#custom-formatters)
 * [Custom Container](#custom-container)
@@ -98,7 +97,7 @@ func main() {
     logger.Notice("Test notice message.")
     
     // Now disable logging.
-    logger.Enabled = false
+    logger.Settings.Enabled = false
     
     // This doesn't output anything because logging is now disabled, but you
     // can still call the methods without any errors.
@@ -131,7 +130,7 @@ func main() {
     
     // You can append multiple files using xdt.Logger.MultiAppend() and
     // xdt.Logger.MultiAppendWriter().
-    logger = xlog.New"testing")
+    logger = xlog.New("testing")
 	logger.MultiAppend(
 		[]string{
 			"stderr",
@@ -146,7 +145,7 @@ func main() {
         "stderr",
         "/var/logs/main-error.log",
 	}
-	logger = xlog.NewMulti("testing", files, xdt.Debug)
+	logger = xlog.NewFiles("testing", files, xdt.Debug)
     
     // Change the way the log messages are formatted. The xlog.Formatter interface
     // requires a format string. The format string defines how the
@@ -157,8 +156,9 @@ func main() {
     // {name} The name of the logger.
     // {level} A string representation of the log level.
     // {message} The message that was logged.
-    logger.Formatter = xlog.NewDefaultFormatter(
+    logger.Settings.Formatter = xlog.NewDefaultFormatter(
         "{date} {name} - {level} - {message}",
+        DefaultDateFormat,
     )
     
     // Outputs: 2014-11-15 09:54:16.278 testing - DEBUG - This is a debug test.
@@ -167,136 +167,36 @@ func main() {
     // Change the way dates are printed using the Go time syntax inside the
     // {date} placeholder.
     // See: http://golang.org/pkg/time/#Time.Format
-    logger.Formatter = xlog.NewDefaultFormatter(
+    logger.Settings.Formatter = xlog.NewDefaultFormatter(
         "{date|Jan _2 15:04:05} {level} {message}",
+        DefaultDateFormat
     )
     
     // Outputs: Nov 15 09:56:56 DEBUG Test debug message.
     logger.Debug("Test debug message.")
     
     // Creating a logger with a pre-configured formatter.
-    formatter := xlog.NewDefaultFormatter(
-        "{date} {name} [{level}] {message}",
-    )
-    logger = xlog.NewFormatted(formatter)
+    logger = xlog.New("testing")
     logger.Append("stdout", xlog.DebugLevel)
+    logger.Settings.formatter = xlog.NewDefaultFormatter(
+        "{date} {name} [{level}] {message}",
+        DefaultDateFormat
+    )
     
     // Outputs: 2014-11-15 09:59:32.427 testing [DEBUG] Test debug message.
     logger.Debug("Test debug message.")
     
     // The message format can be changed without setting a new Formatter.
-    logger.Formatter.SetMessageFormat("{date} {message}")
+    logger.Settings.Formatter.SetMessageFormat("{date} {message}")
     
     // In addition to the default placeholders like {date} and {message}, you
     // can also define your own. The Formatter.PlaceholderFunc() takes the value
     // for the placeholder, and a function which returns the value. Below we
     // define the placeholder {hostname} which will be replaced by the OS hostname.
-    logger.Formatter.PlaceholderFunc("hostname", func(key string) string {
+    logger.Settings.Formatter.PlaceholderFunc("hostname", func(key string) string {
         h, _ := os.Hostname()
         return h
     })
-}
-```
-
-
-#### Global Configuration
-The follow examples demonstrate the use of the xlog global configuration values.
-Changing these values effects every logger.
-
-```go
-package main
-
-import (
-    "io"
-    "os"
-    "time"
-    "github.com/dulo-tech/xlog"
-)
-
-func main() {
-    // The first thing you need to do after creating a new logger is append
-    // one or more files to it. That must be done each and every time you
-    // create a logger. The alternative is to set the names of the files
-    // globally. Once done the files will be automatically appended to each
-    // new logger. You can also set global writers, which will also be
-    // automatically appended.
-    xlog.DefaultAppendFiles = []string{"stdout", "/var/log/messages.log"}
-    xlog.DefaultAppendWriters = []io.Writer{os.Stdout, os.Stderr}
-    
-    // The files and writers that you have automatically appended will by
-    // default be appended at the xlog.DebugLevel, but that can also be changed.
-    xlog.DefaultAppendLevel = xlog.WarningLevel
-
-    // Change the message format for each new logger.
-    xlog.DefaultMessageFormat = "{date} {message}"
-    xlog.DefaultMessageFormat = "{date|2006-01-02 15:04:05.000} {level} {message}"
-    
-    // Change the date format for each new logger. Either write it yourself,
-    // or use one of the defaults from the time package. Note that changing
-    // this global value has no effect when the message format string already
-    // specifies a date format, eg "{date|2006-01-02}". The default date
-    // format only applies to the "{date}" placeholder.
-    xlog.DefaultDateFormat = "2006-01-02 15:04:05.000"
-    xlog.DefaultDateFormat = time.UnixDate
-    xlog.DefaultDateFormat = time.StampMicro
-
-    // You can replicate the functionality of Go's system logger log.Fatal()
-    // and log.Panic() using logger.FatalOn and logger.PanicOn.
-    
-    // Logging a message to xlog.CriticalLevel will cause a fatal shut down
-    // using os.Exit(1).
-    xlog.FatalOn = xlog.CriticalLevel
-    
-    // Logging a message to either xlog.AlertLevel or xlog.EmergencyLevel
-     // causes a panic using panic().
-    xlog.PanicOn = xlog.AlertLevel | xlog.EmergencyLevel
-    
-    // Change the mode and permissions used when the logger opens a file.
-    xlog.FileOpenFlags = os.O_RDWR|os.O_CREATE|os.O_APPEND
-    xlog.FileOpenMode = 0666
-    
-    // The logger will panic by calling panic() when it fails to open a file.
-    // The panic can be globally suppressed. When the panics are suppressed,
-    // and the logger fails to open a file, the file will simply be ignored.
-    // No logs will be written to it.
-    xlog.PanicOnFileErrors = false
-    
-    // You can increase the loggers initial capacity for appended files, which
-    // may help with performance when you know the loggers being created will
-    // have more than 4 (the default) files appended. The logger uses this value
-    // with the make() function when allocating internal maps.
-    xlog.InitialLoggerCapacity = 10
-    
-    // Each log level has a corresponding string representation which is used
-    // in the log messages. Those can be changed. Here we change the string
-    // representations of xlog.DebugLevel and xlog.InfoLevel from their default
-    // values ("DEBUG", "INFO") to "Debug" and "Info".
-    xlog.Levels[xlog.DebugLevel] = "Debug"
-    xlog.Levels[xlog.InfoLevel] = "Info"
-    
-    // The strings "stdout", "stderr", and "stdin" may be passed as a file name
-    // to the logger append methods, which is useful when the files to be written
-    // to are saved as strings in a configuration file, or passed as strings at
-    // the command line. Be default the aliases map to os.Stdout, os.Stderr, and
-    // os.Stdin, but those can be changed to any writer.
-    fp, err := os.OpenFile(
-        "/var/logs/output.log",
-        os.O_RDWR|os.O_CREATE | os.O_APPEND,
-        0666,
-    )
-    if err != nil {
-        panic(err)
-    }
-    defer fp.Close()
-    
-    xlog.Aliases["stdout"] = fp
-    xlog.Aliases["stderr"] = fp
-    
-    // You can even create your own aliases through the xlog.Aliases variable,
-    // and then append the file using the alias.
-    xlog.Aliases["output"] = fp
-    logger := NewLogger()
-    logger.Append("output", xlog.DebugLevel)
 }
 ```
 
@@ -403,18 +303,6 @@ func main() {
     // Outputs: 2014-11-15 09:40:28.701 b.WARNING Test warning message.
     loggerB.Warning("Test warning message.")
     
-    // Use the global default variables to configure the loggers returned by
-    // the xlog.GetLogger() function.
-    xlog.DefaultAppendFiles = []string{"stderr"}
-    xlog.DefaultGlobalLevel = xlog.WarningLevel
-    xlog.DefaultMessageFormat = "{date|2006-01-02} {name}.{level} {message}"
-    
-    // Now every logger returned by the function will be configured with the
-    // default values. There's no need to append files after getting the
-    // first logger.
-    loggerC := xlog.GetLogger("c")
-    loggerD := xlog.GetLogger("d")
-    
     // Outputs: 2014-11-15 c.WARNING Test warning message.
     loggerC.Warning("Test warning message.")
     
@@ -472,9 +360,9 @@ func (f *NullFormatter) Format(name string, level Level, v ...interface{}) strin
 
 func main() {
     // Creating a logger which discards all messages.
-    formatter := &NullFormatter{}
-    logger = xlog.NewFormatted(formatter)
+    logger := xlog.New("testing")
     logger.Append("stdout", xlog.DebugLevel)
+    logger.Settings.Formatter := &NullFormatter{}
     
     // You can also assign the custom formatter to the global logger.
     xlog.SetFormatter(formatter)
@@ -483,12 +371,12 @@ func main() {
 
 Internally the `xlog` package uses the standard Go logger, `log.DefaultLogger`. An instance
 of `log.DefaultLogger` is created for each file you append to the logger. The `log.Logger`
-instances are managed by the `xlog.LoggerContainer` interface, which stores the loggers
-and makes them retrievable by level. The `xlog.LoggerContainer` interface has the
+instances are managed by the `xlog.Container` interface, which stores the loggers
+and makes them retrievable by level. The `xlog.Container` interface has the
 following signature:
 
 ```go
-type LoggerContainer interface {
+type Container interface {
     // Append adds a logger to the container for the given level.
 	Append(logger *log.Logger, level Level)
 	
@@ -504,7 +392,7 @@ type LoggerContainer interface {
 #### Custom Container
 By default when you log a message to `xlog.DebugLevel`, the message is written
 to all files added at the `xlog.DebugLevel` level *and greater*. The
-`xlog.LoggerContainer.Get()` method is responsible for returning loggers registered
+`xlog.Container.Get()` method is responsible for returning loggers registered
 at a given level and all those registered at greater levels.
 
 If you wanted logs written at a given level to only be written at that level, and
@@ -520,31 +408,31 @@ import (
     "github.com/dulo-tech/xlog"
 )
 
-// CustomLoggerContainer maps loggers to levels.
-type CustomLoggerContainer struct {
+// CustomContainer maps loggers to levels.
+type CustomContainer struct {
 	loggers map[xlog.Level][]*log.Logger
 }
 
-// NewCustomLoggerContainer creates and returns a *CustomLoggerContainer instance.
-func NewCustomLoggerContainer() *CustomLoggerContainer {
+// NewCustomContainer creates and returns a *CustomContainer instance.
+func NewCustomContainer() *CustomContainer {
     // Use the Clear() method to initialize the internal map.
-	lm := &CustomLoggerContainer{}
+	lm := &CustomContainer{}
 	lm.Clear()
 	return lm
 }
 
 // Append adds a logger to the map at the given level.
-func (m *CustomLoggerContainer) Append(logger *log.Logger, level xlog.Level) {
+func (m *CustomContainer) Append(logger *log.Logger, level xlog.Level) {
     m.loggers[level] = append(m.loggers[level], logger)
 }
 
 // Get returns the loggers at the given level, and only the given level.
-func (m *CustomLoggerContainer) Get(level xlog.Level) []*log.Logger {
+func (m *CustomContainer) Get(level xlog.Level) []*log.Logger {
 	return m.loggers[level]
 }
 
 // Clear removes all the appended loggers.
-func (m *CustomLoggerContainer) Clear() {
+func (m *CustomContainer) Clear() {
     // Make the internal map the size of xlog.Levels, and initialize
     // each slice to the default initial capacity.
 	m.loggers := make(map[xlog.Level][]*log.Logger, len(xlog.Levels))
@@ -555,13 +443,13 @@ func (m *CustomLoggerContainer) Clear() {
 
 func main() {
     // Creating a logger that uses the custom logger container.
-    lc := NewCustomLoggerContainer()
+    lc := NewCustomContainer()
     logger = xlog.New("testing")
     logger.Container = lc
     logger.Append("stdout", xlog.DebugLevel)
     
     // You can also set the custom container on the global logger.
-    xlog.SetLoggerContainer(lm)
+    xlog.SetContainer(lm)
 }
 ```
 
@@ -571,7 +459,6 @@ the struct `xlog.DefaultLogger`, which implements the `xlog.Loggable` interface.
 
 ```go
 type Loggable interface {
-	Name() string
 	Writable() bool
 	Closed() bool
 	Log(level Level, v ...interface{})

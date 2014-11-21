@@ -70,44 +70,6 @@ var Aliases = map[string]io.Writer{
 	"stderr": os.Stderr,
 }
 
-var (
-	// DefaultDateFormat is the date format to use when none has been specified.
-	DefaultDateFormat string = "2006-01-02 15:04:05.000"
-
-	// DefaultMessageFormat is the message format to use when none has been specified.
-	DefaultMessageFormat string = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
-
-	// DefaultAppendFiles stores the names of files appended to the logger by default.
-	DefaultAppendFiles []string
-
-	// DefaultAppendWriters stores writers that are appended to the logger by default.
-	DefaultAppendWriters []io.Writer
-
-	// DefaultAppendLevel is the default level used when appending files from
-	// DefaultAppendFiles and DefaultAppendWriters.
-	DefaultAppendLevel Level = DebugLevel
-
-	// FileFlags defines the file open options.
-	FileOpenFlags int = os.O_RDWR|os.O_CREATE | os.O_APPEND
-
-	// FileMode defines the mode files are opened in.
-	FileOpenMode os.FileMode = 0666
-
-	// PanicOnFileErrors defines whether the logger should panic when opening a file
-	// fails. When set to false, any file open errors are ignored, and the file won't be
-	// appended.
-	PanicOnFileErrors = true
-
-	// InitialLoggerCapacity defines the initial capacity for each type of logger.
-	InitialLoggerCapacity = 4
-
-	// FatalOn represents levels that causes the application to exit.
-	FatalOn Level = 0
-
-	// PanicOn represents levels that causes the application to panic.
-	PanicOn Level = 0
-)
-
 // Loggable is an interface that provides methods for logging messages to
 // various levels.
 type Loggable interface {

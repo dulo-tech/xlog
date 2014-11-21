@@ -4,7 +4,7 @@ import "testing"
 
 // TestFormat -
 func TestFormat(t *testing.T) {
-	formatter := NewDefaultFormatter("{level} {message}")
+	formatter := NewDefaultFormatter("{level} {message}", DefaultDateFormat)
 	actual := formatter.Format("testing", DebugLevel, "This is a test.")
 	expected := "DEBUG This is a test."
 	ActualEquals(t, actual, expected)
@@ -12,7 +12,7 @@ func TestFormat(t *testing.T) {
 
 // TestPlaceholderFunc -
 func TestPlaceholderFunc(t *testing.T) {
-	formatter := NewDefaultFormatter("{level} {hostname} {message}")
+	formatter := NewDefaultFormatter("{level} {hostname} {message}", DefaultDateFormat)
 	formatter.PlaceholderFunc("hostname", func(key string) string {
 			return "test-service"
 		})

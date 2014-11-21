@@ -7,16 +7,55 @@ import (
 	"io"
 )
 
+const (
+	// DefaultDateFormat is the date format to use when none has been specified.
+	DefaultDateFormat string = "2006-01-02 15:04:05.000"
+
+	// DefaultMessageFormat is the message format to use when none has been specified.
+	DefaultMessageFormat string = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
+
+	// DefaultFileOpenFlags defines the file open options.
+	DefaultFileOpenFlags int = os.O_RDWR|os.O_CREATE | os.O_APPEND
+
+	// DefaultFileOpenMode defines the mode files are opened in.
+	DefaultFileOpenMode os.FileMode = 0666
+
+	// DefaultPanicOnFileErrors defines whether the logger should panic when opening a file
+	// fails. When set to false, any file open errors are ignored, and the file won't be
+	// appended.
+	DefaultPanicOnFileErrors = true
+
+	// DefaultInitialCapacity defines the initial capacity for each type of logger.
+	DefaultInitialCapacity = 4
+)
+
 // Settings represents a group of logger settings.
 type Settings struct {
 	// Enabled defines whether logging is enabled.
 	Enabled  bool
 
 	// Formatter is used to format the log messages.
-	Formatter Formatter
+	Formatter
 
 	// Container holds the appended file loggers.
-	Container LoggerContainer
+	Container
+
+	// FatalOn represents levels that causes the application to exit.
+	FatalOn Level
+
+	// PanicOn represents levels that causes the application to panic.
+	PanicOn Level
+
+	// FileFlags defines the file open options.
+	FileOpenFlags int
+
+	// FileMode defines the mode files are opened in.
+	FileOpenMode os.FileMode
+	
+	// PanicOnFileErrors defines whether the logger should panic when opening a file
+	// fails. When set to false, any file open errors are ignored, and the file won't be
+	// appended.
+	PanicOnFileErrors bool
 
 	// pointers contains any files that have been opened for logging.
 	pointers []*os.File
@@ -29,9 +68,12 @@ type Settings struct {
 func NewDefaultSettings(enabled bool) *Settings {
 	return &Settings{
 		Enabled: enabled,
-		Formatter: NewDefaultFormatter(DefaultMessageFormat),
-		Container: NewDefaultLoggerContainer(),
-		pointers: make([]*os.File, 0),
+		Formatter: NewDefaultFormatter(DefaultMessageFormat, DefaultDateFormat),
+		Container: NewDefaultContainer(DefaultInitialCapacity),
+		FileOpenFlags: DefaultFileOpenFlags,
+		FileOpenMode: DefaultFileOpenMode,
+		PanicOnFileErrors: DefaultPanicOnFileErrors,
+		pointers: make([]*os.File, 0, DefaultInitialCapacity),
 		closed: false,
 	}
 }
@@ -45,59 +87,33 @@ type DefaultLogger struct {
 	*Settings
 }
 
-// New returns a *DefaultLogger instance that's been initialized with default values.
-func New(name string) *DefaultLogger {
-	logger := &DefaultLogger{
+// NewFromSettings returns a *DefaultLogger instance which uses the provided settings.
+func NewFromSettings(name string, settings *Settings) *DefaultLogger {
+	return &DefaultLogger{
 		Name: name,
-		Settings: NewDefaultSettings(true),
+		Settings: settings,
 	}
-	if DefaultAppendFiles != nil && len(DefaultAppendFiles) > 0 {
-		logger.MultiAppend(DefaultAppendFiles, DefaultAppendLevel)
-	}
-	if DefaultAppendWriters != nil && len(DefaultAppendWriters) > 0 {
-		logger.MultiAppendWriters(DefaultAppendWriters, DefaultAppendLevel)
-	}
-
-	return logger
 }
 
-// NewMulti returns a *DefaultLogger instance that's been initialized with one or
+// New returns a *DefaultLogger instance that's been initialized with default values.
+func New(name string) *DefaultLogger {
+	return NewFromSettings(name, NewDefaultSettings(true))
+}
+
+// NewFiles returns a *DefaultLogger instance that's been initialized with one or
 // more files at the given level.
-func NewMulti(name string, files []string, level Level) *DefaultLogger {
+func NewFiles(name string, files []string, level Level) *DefaultLogger {
 	logger := New(name)
 	logger.MultiAppend(files, level);
 	return logger;
 }
 
-// NewMultiWriter returns a *DefaultLogger instance that's been initialized with one or
+// NewWriters returns a *DefaultLogger instance that's been initialized with one or
 // more writers at the given level.
-func NewMultiWriter(name string, writers []io.Writer, level Level) *DefaultLogger {
+func NewWriters(name string, writers []io.Writer, level Level) *DefaultLogger {
 	logger := New(name)
 	logger.MultiAppendWriters(writers, level);
 	return logger;
-}
-
-// NewFormatted returns a *DefaultLogger instance using the provided formatter.
-func NewFormatted(formatter Formatter) *DefaultLogger {
-	logger := New("")
-	logger.Formatter = formatter
-	return logger
-}
-
-// NewFromSettings returns a *DefaultLogger instance which uses the provided settings.
-func NewFromSettings(name string, settings *Settings) *DefaultLogger {
-	logger := &DefaultLogger{
-		Name: name,
-		Settings: settings,
-	}
-	if DefaultAppendFiles != nil && len(DefaultAppendFiles) > 0 {
-		logger.MultiAppend(DefaultAppendFiles, DefaultAppendLevel)
-	}
-	if DefaultAppendWriters != nil && len(DefaultAppendWriters) > 0 {
-		logger.MultiAppendWriters(DefaultAppendWriters, DefaultAppendLevel)
-	}
-	
-	return logger
 }
 
 // Writable returns true when logging is enabled, and the logger hasn't been closed.
@@ -177,9 +193,9 @@ func (l *DefaultLogger) Log(level Level, v ...interface{}) {
 			}
 		}
 
-		if FatalOn&level > 0 {
+		if l.Settings.FatalOn&level > 0 {
 			os.Exit(1)
-		} else if PanicOn&level > 0 {
+		} else if l.Settings.PanicOn&level > 0 {
 			panic(message)
 		}
 	}
@@ -294,9 +310,9 @@ func (l *DefaultLogger) Writer(level Level) *LoggerWriter {
 
 // open returns a file that logs can be written to.
 func (l *DefaultLogger) open(name string) *os.File {
-	w, err := os.OpenFile(name, FileOpenFlags, FileOpenMode)
+	w, err := os.OpenFile(name, l.Settings.FileOpenFlags, l.Settings.FileOpenMode)
 	if err != nil {
-		if PanicOnFileErrors {
+		if l.Settings.PanicOnFileErrors {
 			panic(err)
 		} else {
 			w = nil

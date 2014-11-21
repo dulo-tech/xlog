@@ -56,8 +56,8 @@ func SetFormatter(formatter Formatter) {
 	Instance().Formatter = formatter
 }
 
-// SetLoggerContainer sets the logger container used by the global logger.
-func SetLoggerContainer(lc LoggerContainer) {
+// SetContainer sets the logger container used by the global logger.
+func SetContainer(lc Container) {
 	Instance().Container = lc
 }
 
