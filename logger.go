@@ -28,6 +28,13 @@ const (
 	DefaultInitialCapacity = 4
 )
 
+// Aliases maps file aliases to real file pointers.
+var Aliases = map[string]io.Writer{
+	"stdout": os.Stdout,
+	"stdin": os.Stdin,
+	"stderr": os.Stderr,
+}
+
 // Settings represents a group of logger settings.
 type Settings struct {
 	// Enabled defines whether logging is enabled.
