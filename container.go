@@ -1,9 +1,9 @@
 package xlog
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 )
 
 // Container is an interface that stores a container of log levels and loggers.
@@ -19,10 +19,10 @@ type Container interface {
 type DefaultContainer struct {
 	// Capacity is the initial number of loggers to make.
 	Capacity int
-	
+
 	// loggers are the loggers to be written to.
 	loggers map[Level][]*log.Logger
-	
+
 	// pointers contains any files that have been opened for logging.
 	pointers []*os.File
 
@@ -34,19 +34,19 @@ type DefaultContainer struct {
 func NewDefaultContainer(capacity int) *DefaultContainer {
 	lm := &DefaultContainer{
 		Capacity: capacity,
-		loggers: nil,
+		loggers:  nil,
 		pointers: make([]*os.File, 0, DefaultInitialCapacity),
-		closed: false,
+		closed:   false,
 	}
 	lm.Clear()
-	
+
 	return lm
 }
 
 // Append adds a logger to the container at the given level.
 func (m *DefaultContainer) Append(writer io.Writer, level Level) {
 	logger := newLogger(writer)
-	for lev, _ := range m.loggers {
+	for lev := range m.loggers {
 		if (lev&level > 0) || (lev >= level) {
 			m.loggers[lev] = append(m.loggers[lev], logger)
 		}
@@ -61,7 +61,7 @@ func (m *DefaultContainer) Get(level Level) []*log.Logger {
 // Clear removes all the appended loggers.
 func (m *DefaultContainer) Clear() {
 	m.loggers = make(map[Level][]*log.Logger, len(Levels))
-	for level, _ := range Levels {
+	for level := range Levels {
 		m.loggers[level] = make([]*log.Logger, 0, m.Capacity)
 	}
 }

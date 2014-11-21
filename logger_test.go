@@ -1,10 +1,10 @@
 package xlog
 
 import (
-	"testing"
+	"fmt"
 	"reflect"
 	"strings"
-	"fmt"
+	"testing"
 )
 
 // LoggerName is the default name for the test logger.
@@ -80,7 +80,7 @@ func TestGreater(t *testing.T) {
 }
 
 type LevelCall struct {
-	method string
+	method  string
 	greater []Level
 	lower   []Level
 }
@@ -88,42 +88,42 @@ type LevelCall struct {
 // TestLevelCalls -
 func TestLevelCalls(t *testing.T) {
 	var calls = map[Level]LevelCall{
-		DebugLevel: LevelCall{
+		DebugLevel: {
 			"Debug",
 			[]Level{InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
 			[]Level{},
 		},
-		InfoLevel: LevelCall{
+		InfoLevel: {
 			"Info",
 			[]Level{NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
 			[]Level{DebugLevel},
 		},
-		NoticeLevel: LevelCall{
+		NoticeLevel: {
 			"Notice",
 			[]Level{WarningLevel, ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
 			[]Level{DebugLevel, InfoLevel},
 		},
-		WarningLevel: LevelCall{
+		WarningLevel: {
 			"Warning",
 			[]Level{ErrorLevel, CriticalLevel, AlertLevel, EmergencyLevel},
 			[]Level{DebugLevel, InfoLevel, NoticeLevel},
 		},
-		ErrorLevel: LevelCall{
+		ErrorLevel: {
 			"Error",
 			[]Level{CriticalLevel, AlertLevel, EmergencyLevel},
 			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel},
 		},
-		CriticalLevel: LevelCall{
+		CriticalLevel: {
 			"Critical",
 			[]Level{AlertLevel, EmergencyLevel},
 			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel},
 		},
-		AlertLevel: LevelCall{
+		AlertLevel: {
 			"Alert",
 			[]Level{EmergencyLevel},
 			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel},
 		},
-		EmergencyLevel: LevelCall{
+		EmergencyLevel: {
 			"Emergency",
 			[]Level{},
 			[]Level{DebugLevel, InfoLevel, NoticeLevel, WarningLevel, ErrorLevel, CriticalLevel, AlertLevel},
@@ -131,11 +131,11 @@ func TestLevelCalls(t *testing.T) {
 	}
 	for level, call := range calls {
 		logger, writer := LoggerFixture(level)
-		
+
 		Invoke(logger, call.method, "This is a test.")
 		expected := fmt.Sprintf("testing.%s This is a test.", Levels[level])
 		ActualContains(t, writer.String(), expected)
-		
+
 		for _, greater_level := range call.greater {
 			writer.Clear()
 			Invoke(logger, calls[greater_level].method, "This is a test.")
@@ -152,7 +152,7 @@ func TestLevelCalls(t *testing.T) {
 	logger, writer := LoggerFixture(WarningLevel | InfoLevel)
 	logger.Debug("This is a test.")
 	ActualIsEmpty(t, writer.String())
-	
+
 	writer.Clear()
 	logger.Info("This is a test.")
 	ActualIsNotEmpty(t, writer.String())
@@ -191,7 +191,7 @@ func TestLevels(t *testing.T) {
 func TestWriter(t *testing.T) {
 	logger, writer := LoggerFixture(DebugLevel)
 	lw := logger.Writer(DebugLevel)
-	
+
 	fmt.Fprint(lw, "This is a test.")
 	expected := "testing.DEBUG This is a test."
 	ActualContains(t, writer.String(), expected)
@@ -276,9 +276,9 @@ func TestGetLogger(t *testing.T) {
 }
 
 // Invoke calls the named method on any interface with the given arguments.
-func Invoke(any interface{}, name string, args... interface{}) {
+func Invoke(any interface{}, name string, args ...interface{}) {
 	inputs := make([]reflect.Value, len(args))
-	for i, _ := range args {
+	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
 	}
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)

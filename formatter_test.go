@@ -14,8 +14,8 @@ func TestFormat(t *testing.T) {
 func TestPlaceholderFunc(t *testing.T) {
 	formatter := NewDefaultFormatter("{level} {hostname} {message}", DefaultDateFormat)
 	formatter.PlaceholderFunc("hostname", func(key string) string {
-			return "test-service"
-		})
+		return "test-service"
+	})
 	actual := formatter.Format("testing", DebugLevel, "This is a test.")
 	expected := "DEBUG test-service This is a test."
 	ActualEquals(t, actual, expected)

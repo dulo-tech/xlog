@@ -1,9 +1,9 @@
 package xlog
 
 import (
-	"os"
 	"fmt"
 	"io"
+	"os"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 	DefaultMessageFormat string = "{date|2006-01-02 15:04:05.000} {name}.{level} {message}"
 
 	// DefaultFileOpenFlags defines the file open options.
-	DefaultFileOpenFlags int = os.O_RDWR|os.O_CREATE | os.O_APPEND
+	DefaultFileOpenFlags int = os.O_RDWR | os.O_CREATE | os.O_APPEND
 
 	// DefaultFileOpenMode defines the mode files are opened in.
 	DefaultFileOpenMode os.FileMode = 0666
@@ -31,14 +31,14 @@ const (
 // Aliases maps file aliases to real file pointers.
 var Aliases = map[string]io.Writer{
 	"stdout": os.Stdout,
-	"stdin": os.Stdin,
+	"stdin":  os.Stdin,
 	"stderr": os.Stderr,
 }
 
 // Settings represents a group of logger settings.
 type Settings struct {
 	// Enabled defines whether logging is enabled.
-	Enabled  bool
+	Enabled bool
 
 	// Formatter is used to format the log messages.
 	Formatter
@@ -57,7 +57,7 @@ type Settings struct {
 
 	// FileMode defines the mode files are opened in.
 	FileOpenMode os.FileMode
-	
+
 	// PanicOnFileErrors defines whether the logger should panic when opening a file
 	// fails. When set to false, any file open errors are ignored, and the file won't be
 	// appended.
@@ -67,11 +67,11 @@ type Settings struct {
 // NewDefaultSettings returns a new *Settings instance.
 func NewDefaultSettings(enabled bool) *Settings {
 	return &Settings{
-		Enabled: enabled,
-		Formatter: NewDefaultFormatter(DefaultMessageFormat, DefaultDateFormat),
-		Container: NewDefaultContainer(DefaultInitialCapacity),
-		FileOpenFlags: DefaultFileOpenFlags,
-		FileOpenMode: DefaultFileOpenMode,
+		Enabled:           enabled,
+		Formatter:         NewDefaultFormatter(DefaultMessageFormat, DefaultDateFormat),
+		Container:         NewDefaultContainer(DefaultInitialCapacity),
+		FileOpenFlags:     DefaultFileOpenFlags,
+		FileOpenMode:      DefaultFileOpenMode,
 		PanicOnFileErrors: DefaultPanicOnFileErrors,
 	}
 }
@@ -80,7 +80,7 @@ func NewDefaultSettings(enabled bool) *Settings {
 type DefaultLogger struct {
 	// Name of the logger.
 	Name string
-	
+
 	// Settings for the logger.
 	*Settings
 }
@@ -88,7 +88,7 @@ type DefaultLogger struct {
 // NewFromSettings returns a *DefaultLogger instance which uses the provided settings.
 func NewFromSettings(name string, settings *Settings) *DefaultLogger {
 	return &DefaultLogger{
-		Name: name,
+		Name:     name,
 		Settings: settings,
 	}
 }
@@ -102,16 +102,16 @@ func New(name string) *DefaultLogger {
 // more files at the given level.
 func NewFiles(name string, files []string, level Level) *DefaultLogger {
 	logger := New(name)
-	logger.MultiAppend(files, level);
-	return logger;
+	logger.MultiAppend(files, level)
+	return logger
 }
 
 // NewWriters returns a *DefaultLogger instance that's been initialized with one or
 // more writers at the given level.
 func NewWriters(name string, writers []io.Writer, level Level) *DefaultLogger {
 	logger := New(name)
-	logger.MultiAppendWriters(writers, level);
-	return logger;
+	logger.MultiAppendWriters(writers, level)
+	return logger
 }
 
 // Writable returns true when logging is enabled, and the logger hasn't been closed.
@@ -310,4 +310,3 @@ func (l *DefaultLogger) open(name string) *os.File {
 
 	return w
 }
-

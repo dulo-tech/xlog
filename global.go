@@ -220,4 +220,3 @@ func Emergency(v ...interface{}) {
 func Emergencyf(format string, v ...interface{}) {
 	Instance().Emergencyf(format, v...)
 }
-

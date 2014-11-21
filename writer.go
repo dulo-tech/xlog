@@ -4,7 +4,7 @@ package xlog
 type LoggerWriter struct {
 	// logger is the wrapped logger.
 	logger Loggable
-	
+
 	// level is the level being written to.
 	level Level
 }

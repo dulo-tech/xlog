@@ -2,9 +2,9 @@ package xlog
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
-	"regexp"
 )
 
 // Formatter is an interface that provides methods that format log messages.
@@ -18,7 +18,7 @@ type Formatter interface {
 type DefaultFormatter struct {
 	messageFormat string
 	dateFormat    string
-	funcs  map[string]func(string) string
+	funcs         map[string]func(string) string
 }
 
 // NewDefaultFormatter creates and returns a new DefaultFormatter instance.
@@ -41,10 +41,10 @@ func (f *DefaultFormatter) PlaceholderFunc(key string, fn func(string) string) {
 // Format formats a log message for the given level.
 func (f *DefaultFormatter) Format(name string, level Level, v ...interface{}) string {
 	placeholders := map[string]string{
-		"{date}": (time.Now()).Format(f.dateFormat),
-		"{level}": Levels[level],
+		"{date}":    (time.Now()).Format(f.dateFormat),
+		"{level}":   Levels[level],
 		"{message}": fmt.Sprint(v...),
-		"{name}": name,
+		"{name}":    name,
 	}
 
 	formatted := f.messageFormat
@@ -71,4 +71,3 @@ func SanitizeForDate(messageFormat, dateFormat string) (string, string) {
 
 	return messageFormat, dateFormat
 }
-
