@@ -14,7 +14,7 @@ const LoggerName = "testing"
 // Fixture creates and returns a new logger and writer.
 func LoggerFixture(level Level) (*DefaultLogger, *MemoryWriter) {
 	writer := NewMemoryWriter()
-	logger := NewLogger(LoggerName)
+	logger := New(LoggerName)
 	logger.AppendWriter(writer, level)
 
 	return logger, writer
@@ -65,7 +65,7 @@ func ActualLevelLessThan(t *testing.T, actual, expected Level) {
 // TestName -
 func TestName(t *testing.T) {
 	logger, _ := LoggerFixture(DebugLevel)
-	if logger.Name() != LoggerName {
+	if logger.Name != LoggerName {
 		t.Errorf("Expected a logger named '%s'.", LoggerName)
 	}
 }
@@ -222,7 +222,7 @@ func TestAliases(t *testing.T) {
 	writer := NewMemoryWriter()
 	Aliases["stdout"] = writer
 
-	logger := NewLogger(LoggerName)
+	logger := New(LoggerName)
 	logger.Append("stdout", DebugLevel)
 	logger.Debug("This is a test.")
 	expected := "testing.DEBUG This is a test."
@@ -235,7 +235,7 @@ func TestDefaults(t *testing.T) {
 	DefaultMessageFormat = "{level} - {message}"
 	DefaultAppendLevel = WarningLevel
 	DefaultAppendWriters = []io.Writer{writer}
-	logger := NewLogger(LoggerName)
+	logger := New(LoggerName)
 
 	logger.Warning("This is a test.")
 	expected := "WARNING - This is a test.\n"

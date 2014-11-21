@@ -38,7 +38,7 @@ func main() {
     // usually reflective of the sub-system that will be logging messages. The
     // name will appear in the logged messages so each message can be linked to
     // a specific area of your code.
-    logger := xlog.NewLogger("testing")
+    logger := xlog.New("testing")
     
     // Add files where the logs will be written. You can use a full system path
     // to a file, or the aliases "stdout", "stderr", and "stdin". Each file you
@@ -77,7 +77,7 @@ func main() {
     
     // Any log message with the xlog.WarningLevel level and above will be logged to
     // stdout.
-    logger = xlog.NewLogger("testing")
+    logger = xlog.New("testing")
     logger.Append("stdout", xlog.WarningLevel)
     
     // This doesn't output anything because the xlog.DebugLevel level is lower than
@@ -110,7 +110,7 @@ func main() {
     // Note, when you have the logger open files, the files need to be closed by
     // the logger by deferring the defer logger.Close() method. The logger cannot
     // be used once it's been closed.
-    logger = xlog.NewLogger("testing")
+    logger = xlog.New("testing")
     logger.Append("stdout", xlog.DebugLevel)
     logger.Append("/var/logs/main-error.log", xlog.ErrorLevel)
     defer logger.Close()
@@ -131,7 +131,7 @@ func main() {
     
     // You can append multiple files using xdt.Logger.MultiAppend() and
     // xdt.Logger.MultiAppendWriter().
-    logger = xlog.NewLogger("testing")
+    logger = xlog.New"testing")
 	logger.MultiAppend(
 		[]string{
 			"stderr",
@@ -146,7 +146,7 @@ func main() {
         "stderr",
         "/var/logs/main-error.log",
 	}
-	logger = xlog.NewMultiLogger("testing", files, xdt.Debug)
+	logger = xlog.NewMulti("testing", files, xdt.Debug)
     
     // Change the way the log messages are formatted. The xlog.Formatter interface
     // requires a format string. The format string defines how the
@@ -178,7 +178,7 @@ func main() {
     formatter := xlog.NewDefaultFormatter(
         "{date} {name} [{level}] {message}",
     )
-    logger = xlog.NewFormattedLogger(formatter)
+    logger = xlog.NewFormatted(formatter)
     logger.Append("stdout", xlog.DebugLevel)
     
     // Outputs: 2014-11-15 09:59:32.427 testing [DEBUG] Test debug message.
@@ -473,7 +473,7 @@ func (f *NullFormatter) Format(name string, level Level, v ...interface{}) strin
 func main() {
     // Creating a logger which discards all messages.
     formatter := &NullFormatter{}
-    logger = xlog.NewFormattedLogger(formatter)
+    logger = xlog.NewFormatted(formatter)
     logger.Append("stdout", xlog.DebugLevel)
     
     // You can also assign the custom formatter to the global logger.
@@ -556,7 +556,7 @@ func (m *CustomLoggerContainer) Clear() {
 func main() {
     // Creating a logger that uses the custom logger container.
     lc := NewCustomLoggerContainer()
-    logger = xlog.NewLogger("testing")
+    logger = xlog.New("testing")
     logger.Container = lc
     logger.Append("stdout", xlog.DebugLevel)
     
@@ -566,7 +566,7 @@ func main() {
 ```
 
 #### Loggable Interface
-The `xlog.NewLogger()` method and other New methods return an instance of
+The `xlog.New()` method and other New methods return an instance of
 the struct `xlog.DefaultLogger`, which implements the `xlog.Loggable` interface.
 
 ```go

@@ -16,7 +16,7 @@ var (
 // Instance returns the global logger.
 func Instance() *DefaultLogger {
 	if globalInstance == nil {
-		globalInstance = NewLogger("xlog")
+		globalInstance = New("xlog")
 		globalInstance.Append("stdout", DebugLevel)
 		globalAppended = false
 	}
@@ -32,7 +32,7 @@ func GetLogger(name string) *DefaultLogger {
 		globalLoggers = make(map[string]*DefaultLogger)
 	}
 	if _, ok := globalLoggers[name]; !ok {
-		globalLoggers[name] = NewLogger(name)
+		globalLoggers[name] = New(name)
 	}
 
 	return globalLoggers[name]
@@ -48,7 +48,7 @@ func Close() {
 
 // SetName sets the name of the global logger.
 func SetName(name string) {
-	Instance().name = name
+	Instance().Name = name
 }
 
 // SetFormatter sets the formatter used by the global logger.

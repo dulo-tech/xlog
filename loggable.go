@@ -111,7 +111,6 @@ var (
 // Loggable is an interface that provides methods for logging messages to
 // various levels.
 type Loggable interface {
-	Name() string
 	Writable() bool
 	Closed() bool
 	Log(level Level, v ...interface{})

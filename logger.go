@@ -7,8 +7,8 @@ import (
 	"io"
 )
 
-// DefaultLogger is the default implementation of the Loggable interface.
-type DefaultLogger struct {
+// Settings represents a group of logger settings.
+type Settings struct {
 	// Enabled defines whether logging is enabled.
 	Enabled  bool
 
@@ -18,9 +18,6 @@ type DefaultLogger struct {
 	// Container holds the appended file loggers.
 	Container LoggerContainer
 
-	// name defines the name of the logger.
-	name string
-
 	// pointers contains any files that have been opened for logging.
 	pointers []*os.File
 
@@ -28,15 +25,31 @@ type DefaultLogger struct {
 	closed bool
 }
 
-// NewLogger returns a *DefaultLogger instance that's been initialized with default values.
-func NewLogger(name string) *DefaultLogger {
-	logger := &DefaultLogger{
-		name: name,
-		Enabled: true,
+// NewDefaultSettings returns a new *Settings instance.
+func NewDefaultSettings(enabled bool) *Settings {
+	return &Settings{
+		Enabled: enabled,
 		Formatter: NewDefaultFormatter(DefaultMessageFormat),
 		Container: NewDefaultLoggerContainer(),
 		pointers: make([]*os.File, 0),
 		closed: false,
+	}
+}
+
+// DefaultLogger is the default implementation of the Loggable interface.
+type DefaultLogger struct {
+	// Name of the logger.
+	Name string
+	
+	// Settings for the logger.
+	*Settings
+}
+
+// New returns a *DefaultLogger instance that's been initialized with default values.
+func New(name string) *DefaultLogger {
+	logger := &DefaultLogger{
+		Name: name,
+		Settings: NewDefaultSettings(true),
 	}
 	if DefaultAppendFiles != nil && len(DefaultAppendFiles) > 0 {
 		logger.MultiAppend(DefaultAppendFiles, DefaultAppendLevel)
@@ -48,32 +61,43 @@ func NewLogger(name string) *DefaultLogger {
 	return logger
 }
 
-// NewMultiLogger returns a *DefaultLogger instance that's been initialized with one or
+// NewMulti returns a *DefaultLogger instance that's been initialized with one or
 // more files at the given level.
-func NewMultiLogger(name string, files []string, level Level) *DefaultLogger {
-	logger := NewLogger(name)
+func NewMulti(name string, files []string, level Level) *DefaultLogger {
+	logger := New(name)
 	logger.MultiAppend(files, level);
 	return logger;
 }
 
-// NewMultiWriterLogger returns a *DefaultLogger instance that's been initialized with one or
+// NewMultiWriter returns a *DefaultLogger instance that's been initialized with one or
 // more writers at the given level.
-func NewMultiWriterLogger(name string, writers []io.Writer, level Level) *DefaultLogger {
-	logger := NewLogger(name)
+func NewMultiWriter(name string, writers []io.Writer, level Level) *DefaultLogger {
+	logger := New(name)
 	logger.MultiAppendWriters(writers, level);
 	return logger;
 }
 
-// NewFormattedLogger returns a *DefaultLogger instance using the provided formatter.
-func NewFormattedLogger(formatter Formatter) *DefaultLogger {
-	logger := NewLogger("")
+// NewFormatted returns a *DefaultLogger instance using the provided formatter.
+func NewFormatted(formatter Formatter) *DefaultLogger {
+	logger := New("")
 	logger.Formatter = formatter
 	return logger
 }
 
-// Name returns the name of the logger.
-func (l *DefaultLogger) Name() string {
-	return l.name
+// NewFromSettings returns a *DefaultLogger instance which uses the provided settings.
+func NewFromSettings(name string, settings *Settings) *DefaultLogger {
+	logger := &DefaultLogger{
+		Name: name,
+		Settings: settings,
+	}
+	if DefaultAppendFiles != nil && len(DefaultAppendFiles) > 0 {
+		logger.MultiAppend(DefaultAppendFiles, DefaultAppendLevel)
+	}
+	if DefaultAppendWriters != nil && len(DefaultAppendWriters) > 0 {
+		logger.MultiAppendWriters(DefaultAppendWriters, DefaultAppendLevel)
+	}
+	
+	return logger
 }
 
 // Writable returns true when logging is enabled, and the logger hasn't been closed.
@@ -146,7 +170,7 @@ func (l *DefaultLogger) ClearAppended() {
 // Arguments are handled in the manner of fmt.Print.
 func (l *DefaultLogger) Log(level Level, v ...interface{}) {
 	if l.Writable() {
-		message := l.Formatter.Format(l.name, level, v...)
+		message := l.Formatter.Format(l.Name, level, v...)
 		if message != "" {
 			for _, logger := range l.Container.Get(level) {
 				logger.Print(message)
