@@ -60,6 +60,16 @@ var Levels = map[Level]string{
 	EmergencyLevel: "EMERGENCY",
 }
 
+// ParseLevel returns a level corresponding to the given string.
+func ParseLevel(str string) Level {
+	for level, value := range Levels {
+		if value == str {
+			return level
+		}
+	}
+	panic("Invalid level.")
+}
+
 // IsGreaterLevel returns whether the level is_greater_than is greater than that.
 func IsGreaterLevel(is_greater_than, that Level) bool {
 	return searchForLevel(is_greater_than) > searchForLevel(that)
