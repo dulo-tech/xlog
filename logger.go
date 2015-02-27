@@ -114,6 +114,11 @@ func NewWriters(name string, writers []io.Writer, level Level) *DefaultLogger {
 	return logger
 }
 
+// New returns a new logger using the settings of the parent logger.
+func (l *DefaultLogger) New(name string) Loggable {
+	return NewFromSettings(name, l.Settings)
+}
+
 // Writable returns true when logging is enabled, and the logger hasn't been closed.
 func (l *DefaultLogger) Writable() bool {
 	return l.Enabled && !l.Settings.Container.Closed()

@@ -93,6 +93,7 @@ func searchForLevel(level Level) int {
 // Loggable is an interface that provides methods for logging messages to
 // various levels.
 type Loggable interface {
+	New(name string) Loggable
 	Writable() bool
 	Closed() bool
 	Log(level Level, v ...interface{})

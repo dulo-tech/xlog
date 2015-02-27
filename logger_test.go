@@ -275,6 +275,15 @@ func TestGetLogger(t *testing.T) {
 	}
 }
 
+// TestNewFromLogger -
+func TestNewFromLogger(t *testing.T) {
+	loggerA := GetLogger("a")
+	loggerB := loggerA.New("b").(*DefaultLogger)
+	if loggerA.Settings != loggerB.Settings {
+		t.Error("Expected both loggers to have the same settings.")
+	}
+}
+
 // Invoke calls the named method on any interface with the given arguments.
 func Invoke(any interface{}, name string, args ...interface{}) {
 	inputs := make([]reflect.Value, len(args))
