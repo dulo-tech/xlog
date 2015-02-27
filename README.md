@@ -196,6 +196,11 @@ func main() {
         h, _ := os.Hostname()
         return h
     })
+    
+    // Creating a "child" logger. In this example the child logger inherits the
+    // settings from the parent logger, but has it's own name.
+    logger = xlog.New("testing")
+    child := logger.New("child")
 }
 ```
 
