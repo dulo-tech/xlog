@@ -6,8 +6,6 @@ A simple logger for the Go language.
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/dulo-tech/xlog)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dulo-tech/xlog/master/LICENSE.md)
 
-Documentation is available from the [GoDoc website](http://godoc.org/github.com/dulo-tech/xlog).
-
 * [Installation](#installation)
 * [Examples](#examples)
 * [Global Logger](#global-logger)
